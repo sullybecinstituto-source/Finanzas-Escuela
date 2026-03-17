@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Escuela de Terapias - Cloud</title>
+    <title>Gestión Escuela de Terapias - Pro Max</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen pb-12 text-slate-900">
 
     <div class="max-w-4xl mx-auto px-4 pt-8">
+        <!-- Encabezado -->
         <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800 tracking-tight text-center md:text-left">Escuela & Consultorio</h1>
@@ -37,16 +38,18 @@
             </div>
         </header>
 
+        <!-- Navegación -->
         <nav class="flex border-b border-slate-200 mb-6 bg-white rounded-t-xl overflow-hidden shadow-sm">
             <button onclick="switchTab('finanzas')" id="btn-finanzas" class="flex-1 py-4 text-sm font-bold uppercase tracking-widest tab-active">Finanzas</button>
-            <button onclick="switchTab('alumnos')" id="btn-alumnos" class="flex-1 py-4 text-sm font-bold uppercase tracking-widest text-slate-400">Lista de Alumnos</button>
+            <button onclick="switchTab('alumnos')" id="btn-alumnos" class="flex-1 py-4 text-sm font-bold uppercase tracking-widest text-slate-400">Alumnos y Cursos</button>
         </nav>
 
+        <!-- SECCIÓN FINANZAS -->
         <section id="sec-finanzas">
             <div class="glass border border-slate-200 rounded-3xl p-6 mb-8 shadow-xl">
                 <form id="finance-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Fecha</label>
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Fecha de Cobro</label>
                         <input type="date" id="fecha" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div class="md:col-span-1">
@@ -69,23 +72,341 @@
                     </div>
                     <div class="md:col-span-1">
                         <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Monto ($)</label>
-                        <input type="number" id="monto" step="0.01" placeholder="0.00" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input type="number" id="monto" step="0.01" placeholder="0.00" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold text-slate-700">
                     </div>
                     <div class="md:col-span-1 flex items-end">
                         <button type="submit" id="submit-btn" disabled class="w-full bg-slate-400 text-white font-bold py-3 rounded-xl shadow-lg opacity-50 cursor-not-allowed uppercase tracking-tighter">Registrar</button>
                     </div>
                     
-                    <div id="wrapper-alumno" class="md:col-span-2">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase italic">Seleccionar Alumno</label>
-                        <select id="select-alumno" class="w-full bg-indigo-50 border-indigo-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold text-indigo-800">
-                            </select>
+                    <!-- Campos de Alumno Mejorados -->
+                    <div id="wrapper-alumno-extra" class="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4 hidden bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                        <div class="md:col-span-1">
+                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Alumno</label>
+                            <select id="select-alumno" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold text-indigo-800"></select>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Diplomado</label>
+                            <select id="select-curso" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold text-indigo-800"></select>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Fecha de la Clase</label>
+                            <input type="date" id="fecha-clase-especifica" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Mes / Nota Corta</label>
+                            <input type="text" id="mes-pagado" placeholder="Ej: Marzo" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
+                        </div>
                     </div>
 
                     <div id="wrapper-desc" class="md:col-span-4">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Descripción / Nota</label>
-                        <input type="text" id="descripcion" placeholder="Ej: Pago mes de Marzo / Compra de aceites" class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Nota adicional (Opcional)</label>
+                        <input type="text" id="descripcion" placeholder="Cualquier detalle extra aquí..." class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </form>
             </div>
 
-            <div class="flex flex-col sm:flex-row items
+            <!-- Listado Principal -->
+            <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4 px-2">
+                <div class="flex items-center gap-2">
+                    <input type="date" id="filtro-fecha" class="border-none bg-white shadow-sm rounded-lg p-2 text-sm text-slate-700 font-bold">
+                    <p id="resumen-dia" class="text-xs font-bold text-slate-500 uppercase"></p>
+                </div>
+                <button onclick="exportarCSV()" class="text-[10px] font-bold text-indigo-600 bg-white px-4 py-2 rounded-xl shadow-sm border border-indigo-50 uppercase tracking-widest">Excel</button>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-slate-400 text-[9px] uppercase tracking-widest font-bold">
+                        <tr>
+                            <th class="px-6 py-4">Detalle</th>
+                            <th class="px-6 py-4 text-right">Monto</th>
+                            <th class="px-6 py-4"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-transacciones" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECCIÓN ALUMNOS Y CURSOS -->
+        <section id="sec-alumnos" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Alumnos -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Alumnos (Haz clic para ver pagos)</h3>
+                    <form id="alumno-form" class="flex gap-2 mb-6">
+                        <input type="text" id="nombre-alumno" placeholder="Nombre completo" required class="flex-1 bg-slate-50 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold">+</button>
+                    </form>
+                    <div id="ui-alumnos" class="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto custom-scrollbar"></div>
+                </div>
+
+                <!-- Diplomados -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Diplomados</h3>
+                    <form id="curso-form" class="flex gap-2 mb-6">
+                        <input type="text" id="nombre-curso" placeholder="Ej: Terapia Floral" required class="flex-1 bg-slate-50 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                        <button type="submit" class="bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold">+</button>
+                    </form>
+                    <div id="ui-cursos" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- MODAL DE HISTORIAL INDIVIDUAL -->
+    <div id="modal-historial" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-indigo-600 text-white">
+                <div>
+                    <h2 id="modal-titulo-alumno" class="text-xl font-bold italic">Nombre del Alumno</h2>
+                    <p class="text-[10px] uppercase font-bold opacity-80 tracking-widest">Historial de Pagos Individual</p>
+                </div>
+                <button onclick="cerrarModal()" class="bg-white/20 hover:bg-white/40 p-2 rounded-full transition-colors">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50">
+                <div id="modal-lista-pagos" class="space-y-3"></div>
+            </div>
+            <div class="p-4 bg-white border-t border-slate-100 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-400 uppercase">Total Pagado</span>
+                <span id="modal-total-alumno" class="text-xl font-bold text-emerald-600">$0</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCcAda5-ewiR78bfLyYrjEMhfdc0RFxd7s",
+          authDomain: "finanzas-escuela.firebaseapp.com",
+          projectId: "finanzas-escuela",
+          storageBucket: "finanzas-escuela.firebasestorage.app",
+          messagingSenderId: "106864276061",
+          appId: "1:106864276061:web:cc8b26cca0ef07088f13b4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const transColl = collection(db, "transacciones");
+        const alumColl = collection(db, "alumnos");
+        const cursoColl = collection(db, "cursos");
+
+        let transacciones = [], alumnos = [], cursos = [];
+
+        // Sincronización Nube
+        onSnapshot(query(transColl, orderBy("timestamp", "desc")), (snap) => {
+            transacciones = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderFinanzas();
+            updateStatus();
+        });
+
+        onSnapshot(query(alumColl, orderBy("nombre", "asc")), (snap) => {
+            alumnos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderAlumnos();
+            updateSelectors();
+        });
+
+        onSnapshot(query(cursoColl, orderBy("nombre", "asc")), (snap) => {
+            cursos = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderCursos();
+            updateSelectors();
+        });
+
+        function updateStatus() {
+            const pill = document.getElementById('cloud-status');
+            const text = document.getElementById('status-text');
+            const btn = document.getElementById('submit-btn');
+            pill.classList.replace('bg-amber-400', 'bg-emerald-500');
+            pill.classList.remove('animate-pulse');
+            text.innerText = "Nube Conectada";
+            btn.disabled = false;
+            btn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg cursor-pointer uppercase transition-all";
+        }
+
+        // Formularios
+        document.getElementById('finance-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const cat = document.getElementById('categoria').value;
+            const tipo = cat.startsWith('ingreso') ? 'ingreso' : 'egreso';
+            const monto = parseFloat(document.getElementById('monto').value);
+            const nota = document.getElementById('descripcion').value;
+            
+            let data = {
+                fecha: document.getElementById('fecha').value,
+                categoria: cat,
+                tipo: tipo,
+                monto: monto,
+                descripcion: nota,
+                timestamp: Date.now()
+            };
+
+            if(cat === 'ingreso-clase') {
+                const alum = document.getElementById('select-alumno').value;
+                const curs = document.getElementById('select-curso').value;
+                const fClase = document.getElementById('fecha-clase-especifica').value;
+                const mes = document.getElementById('mes-pagado').value;
+                
+                // Formateamos descripción para que sea legible y buscable
+                data.alumnoRel = alum; // Relación directa para el historial
+                data.descripcion = `[${alum}] CURSO: ${curs} | CLASE: ${fClase || 'Sin fecha'} | MES: ${mes} ${nota}`.trim();
+            }
+
+            await addDoc(transColl, data);
+            e.target.reset();
+            resetDates();
+            checkAlumnoField();
+        };
+
+        document.getElementById('alumno-form').onsubmit = async (e) => {
+            e.preventDefault();
+            await addDoc(alumColl, { nombre: document.getElementById('nombre-alumno').value });
+            e.target.reset();
+        };
+
+        document.getElementById('curso-form').onsubmit = async (e) => {
+            e.preventDefault();
+            await addDoc(cursoColl, { nombre: document.getElementById('nombre-curso').value });
+            e.target.reset();
+        };
+
+        window.eliminarReg = async (id, coll) => {
+            if(confirm('¿Eliminar permanentemente?')) await deleteDoc(doc(db, coll, id));
+        };
+
+        // Renderizado Listas
+        function renderFinanzas() {
+            const ui = document.getElementById('lista-transacciones');
+            ui.innerHTML = '';
+            const filtro = document.getElementById('filtro-fecha').value;
+            let ing = 0, egr = 0, dia = 0;
+
+            transacciones.forEach(t => {
+                if(t.tipo === 'ingreso') ing += t.monto; else egr += t.monto;
+                if(t.fecha === filtro) dia += (t.tipo === 'ingreso' ? t.monto : -t.monto);
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition-colors";
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="text-xs font-bold text-slate-800 uppercase tracking-tight">${t.descripcion}</div>
+                        <div class="text-[8px] font-bold text-indigo-400 uppercase mt-1">${t.categoria.replace(/-/g, ' ')} | Pagado el ${t.fecha}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right font-bold text-sm ${t.tipo === 'ingreso' ? 'text-emerald-600' : 'text-rose-500'}">
+                        $${t.monto.toLocaleString()}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="eliminarReg('${t.id}', 'transacciones')" class="text-slate-200 hover:text-rose-400">×</button>
+                    </td>
+                `;
+                ui.appendChild(row);
+            });
+            document.getElementById('total-ingresos').innerText = `$${ing.toLocaleString()}`;
+            document.getElementById('total-egresos').innerText = `$${egr.toLocaleString()}`;
+            document.getElementById('resumen-dia').innerText = `Balance día: $${dia.toLocaleString()}`;
+        }
+
+        function renderAlumnos() {
+            const ui = document.getElementById('ui-alumnos');
+            ui.innerHTML = alumnos.map(a => `
+                <div class="group flex items-center justify-between bg-slate-50 p-4 rounded-2xl hover:bg-white hover:shadow-md border border-transparent hover:border-indigo-100 transition-all">
+                    <button onclick="verHistorial('${a.nombre}')" class="flex-1 text-left flex items-center gap-3">
+                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
+                            ${a.nombre.charAt(0).toUpperCase()}
+                        </div>
+                        <span class="font-bold text-slate-700 text-sm">${a.nombre}</span>
+                    </button>
+                    <button onclick="eliminarReg('${a.id}', 'alumnos')" class="opacity-0 group-hover:opacity-100 text-rose-300 hover:text-rose-600 p-2">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderCursos() {
+            document.getElementById('ui-cursos').innerHTML = cursos.map(c => `
+                <div class="flex justify-between items-center bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+                    <span class="text-xs font-bold text-emerald-800 uppercase tracking-tight">${c.nombre}</span>
+                    <button onclick="eliminarReg('${c.id}', 'cursos')" class="text-emerald-300 hover:text-rose-400 font-bold px-2">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateSelectors() {
+            const selAlum = document.getElementById('select-alumno');
+            const selCur = document.getElementById('select-curso');
+            selAlum.innerHTML = alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('') || '<option disabled>Sin Alumnos</option>';
+            selCur.innerHTML = cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('') || '<option disabled>Sin Cursos</option>';
+        }
+
+        // --- HISTORIAL INDIVIDUAL (MODAL) ---
+        window.verHistorial = (nombre) => {
+            const modal = document.getElementById('modal-historial');
+            const listaUI = document.getElementById('modal-lista-pagos');
+            const totalUI = document.getElementById('modal-total-alumno');
+            document.getElementById('modal-titulo-alumno').innerText = nombre;
+
+            const pagosAlumno = transacciones.filter(t => t.alumnoRel === nombre);
+            let total = 0;
+
+            listaUI.innerHTML = pagosAlumno.length > 0 
+                ? pagosAlumno.map(p => {
+                    total += p.monto;
+                    return `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-xs font-bold text-slate-800 uppercase leading-tight">${p.descripcion.split('] ')[1] || p.descripcion}</span>
+                                <span class="text-sm font-bold text-emerald-600">$${p.monto.toLocaleString()}</span>
+                            </div>
+                            <div class="text-[9px] font-bold text-slate-400 uppercase">Cobrado el: ${p.fecha}</div>
+                        </div>
+                    `;
+                }).join('')
+                : `<div class="text-center py-8 text-slate-400 font-bold uppercase text-xs">No hay pagos registrados para este alumno</div>`;
+
+            totalUI.innerText = `$${total.toLocaleString()}`;
+            modal.classList.remove('hidden');
+        };
+
+        window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
+
+        // Helpers UI
+        const hoy = new Date().toISOString().split('T')[0];
+        const resetDates = () => {
+            document.getElementById('fecha').value = hoy;
+            document.getElementById('fecha-clase-especifica').value = '';
+        };
+        resetDates();
+        document.getElementById('filtro-fecha').value = hoy;
+        document.getElementById('filtro-fecha').onchange = () => renderFinanzas();
+
+        window.switchTab = (tab) => {
+            const isFin = tab === 'finanzas';
+            document.getElementById('sec-finanzas').classList.toggle('hidden', !isFin);
+            document.getElementById('sec-alumnos').classList.toggle('hidden', isFin);
+            document.getElementById('btn-finanzas').className = isFin ? 'flex-1 py-4 text-sm font-bold uppercase tracking-widest tab-active' : 'flex-1 py-4 text-sm font-bold uppercase tracking-widest text-slate-400';
+            document.getElementById('btn-alumnos').className = !isFin ? 'flex-1 py-4 text-sm font-bold uppercase tracking-widest tab-active' : 'flex-1 py-4 text-sm font-bold uppercase tracking-widest text-slate-400';
+        };
+
+        window.checkAlumnoField = () => {
+            const isClase = document.getElementById('categoria').value === 'ingreso-clase';
+            document.getElementById('wrapper-alumno-extra').classList.toggle('hidden', !isClase);
+        };
+        checkAlumnoField();
+
+        window.exportarCSV = () => {
+            let csv = "\uFEFFFecha Cobro,Detalle,Monto\n";
+            transacciones.forEach(t => csv += `${t.fecha},"${t.descripcion}",${t.monto}\n`);
+            const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `finanzas_${hoy}.csv`;
+            link.click();
+        };
+
+    </script>
+</body>
+</html>
