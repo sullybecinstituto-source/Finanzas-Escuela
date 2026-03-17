@@ -49,7 +49,7 @@
             <div class="glass border border-slate-200 rounded-3xl p-6 mb-8 shadow-xl">
                 <form id="finance-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Fecha de Cobro</label>
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Fecha de Cobro (Hoy)</label>
                         <input type="date" id="fecha" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div class="md:col-span-1">
@@ -93,14 +93,14 @@
                             <input type="date" id="fecha-clase-especifica" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
                         </div>
                         <div class="md:col-span-1">
-                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Mes / Nota Corta</label>
-                            <input type="text" id="mes-pagado" placeholder="Ej: Marzo" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
+                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Nota Corta (Mes/Clase)</label>
+                            <input type="text" id="mes-pagado" placeholder="Ej: Marzo / Clase 1 de 4" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
                         </div>
                     </div>
 
                     <div id="wrapper-desc" class="md:col-span-4">
                         <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Nota adicional (Opcional)</label>
-                        <input type="text" id="descripcion" placeholder="Cualquier detalle extra aquí..." class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="descripcion" placeholder="Ej: Pagó con transferencia..." class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </form>
             </div>
@@ -234,9 +234,10 @@
             const tipo = cat.startsWith('ingreso') ? 'ingreso' : 'egreso';
             const monto = parseFloat(document.getElementById('monto').value);
             const nota = document.getElementById('descripcion').value;
+            const fechaCobro = document.getElementById('fecha').value;
             
             let data = {
-                fecha: document.getElementById('fecha').value,
+                fecha: fechaCobro,
                 categoria: cat,
                 tipo: tipo,
                 monto: monto,
@@ -250,15 +251,21 @@
                 const fClase = document.getElementById('fecha-clase-especifica').value;
                 const mes = document.getElementById('mes-pagado').value;
                 
-                // Formateamos descripción para que sea legible y buscable
-                data.alumnoRel = alum; // Relación directa para el historial
-                data.descripcion = `[${alum}] CURSO: ${curs} | CLASE: ${fClase || 'Sin fecha'} | MES: ${mes} ${nota}`.trim();
+                data.alumnoRel = alum; 
+                data.descripcion = `[${alum}] CURSO: ${curs} | CLASE: ${fClase || 'VARIAS'} | ${mes ? mes + ' | ' : ''}${nota}`.trim();
             }
 
             await addDoc(transColl, data);
-            e.target.reset();
-            resetDates();
-            checkAlumnoField();
+            
+            // --- MEJORA: LIMPIEZA INTELIGENTE ---
+            // Solo limpiamos monto y notas, mantenemos alumno y diplomado para capturas múltiples rápidas
+            document.getElementById('monto').value = '';
+            document.getElementById('descripcion').value = '';
+            document.getElementById('fecha-clase-especifica').value = '';
+            document.getElementById('mes-pagado').value = '';
+            
+            // Mantenemos el foco en el monto para la siguiente clase
+            document.getElementById('monto').focus();
         };
 
         document.getElementById('alumno-form').onsubmit = async (e) => {
@@ -293,7 +300,7 @@
                 row.innerHTML = `
                     <td class="px-6 py-4">
                         <div class="text-xs font-bold text-slate-800 uppercase tracking-tight">${t.descripcion}</div>
-                        <div class="text-[8px] font-bold text-indigo-400 uppercase mt-1">${t.categoria.replace(/-/g, ' ')} | Pagado el ${t.fecha}</div>
+                        <div class="text-[8px] font-bold text-indigo-400 uppercase mt-1">${t.categoria.replace(/-/g, ' ')} | Cobrado el ${t.fecha}</div>
                     </td>
                     <td class="px-6 py-4 text-right font-bold text-sm ${t.tipo === 'ingreso' ? 'text-emerald-600' : 'text-rose-500'}">
                         $${t.monto.toLocaleString()}
@@ -342,7 +349,7 @@
             selCur.innerHTML = cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('') || '<option disabled>Sin Cursos</option>';
         }
 
-        // --- HISTORIAL INDIVIDUAL (MODAL) ---
+        // Historial Individual
         window.verHistorial = (nombre) => {
             const modal = document.getElementById('modal-historial');
             const listaUI = document.getElementById('modal-lista-pagos');
