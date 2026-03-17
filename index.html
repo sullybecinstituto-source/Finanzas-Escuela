@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Escuela de Terapias - Pro Max</title>
+    <title>Gestión Escuela de Terapias - Edición Habilitada</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
@@ -76,7 +76,6 @@
                         <button type="submit" id="submit-btn" disabled class="w-full bg-slate-400 text-white font-bold py-3 rounded-xl shadow-lg opacity-50 cursor-not-allowed uppercase tracking-tighter transition-all">Registrar</button>
                     </div>
                     
-                    <!-- CAMPOS DINÁMICOS: PAGO DE DIPLOMADO (Aparecen si se elige ingreso-clase) -->
                     <div id="wrapper-alumno-extra" class="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
                         <div class="md:col-span-1">
                             <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Seleccionar Alumno</label>
@@ -100,7 +99,6 @@
                         </div>
                     </div>
 
-                    <!-- CAMPOS DINÁMICOS: TALLERES (Aparecen si se elige ingreso-taller) -->
                     <div id="wrapper-taller-extra" class="md:col-span-4 hidden bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -121,7 +119,7 @@
                 </form>
             </div>
 
-            <!-- Listado Principal con Filtro -->
+            <!-- Listado Principal -->
             <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4 px-2">
                 <div class="flex items-center gap-2">
                     <input type="date" id="filtro-fecha" class="border-none bg-white shadow-sm rounded-lg p-2 text-sm text-slate-700 font-bold">
@@ -134,7 +132,7 @@
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 text-slate-400 text-[9px] uppercase tracking-widest font-bold">
                         <tr>
-                            <th class="px-6 py-4">Descripción del Movimiento</th>
+                            <th class="px-6 py-4">Descripción</th>
                             <th class="px-6 py-4 text-right">Monto</th>
                             <th class="px-6 py-4"></th>
                         </tr>
@@ -150,16 +148,20 @@
                 <!-- Registro de Alumnos Permanentes -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Lista de Alumnos</h3>
-                        <span id="count-alumnos" class="text-[10px] font-bold bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">Cargando...</span>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Alumnos</h3>
+                        <span id="count-alumnos" class="text-[10px] font-bold bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span>
                     </div>
-                    <form id="alumno-form" class="space-y-3 mb-6">
-                        <input type="text" id="nombre-alumno" placeholder="Nombre completo" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                    <form id="alumno-form" class="space-y-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <input type="hidden" id="edit-alumno-id">
+                        <input type="text" id="nombre-alumno" placeholder="Nombre completo" required class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="curp-alumno" placeholder="CURP" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 uppercase">
-                            <input type="tel" id="tel-alumno" placeholder="Teléfono" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                            <input type="text" id="curp-alumno" placeholder="CURP" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 uppercase">
+                            <input type="tel" id="tel-alumno" placeholder="Teléfono" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                         </div>
-                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-xl shadow-md transition-all active:scale-95">+ Registrar Nuevo Alumno</button>
+                        <div class="flex gap-2">
+                            <button type="submit" id="btn-submit-alumno" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl shadow-md transition-all active:scale-95 text-sm uppercase">Guardar Alumno</button>
+                            <button type="button" id="btn-cancel-alumno" onclick="cancelarEdicionAlumno()" class="hidden bg-slate-200 text-slate-600 font-bold px-4 py-2 rounded-xl text-sm transition-all">✕</button>
+                        </div>
                     </form>
                     <div id="ui-alumnos" class="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto custom-scrollbar"></div>
                 </div>
@@ -167,13 +169,17 @@
                 <!-- Diplomados -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Catálogo de Diplomados</h3>
-                        <span id="count-cursos" class="text-[10px] font-bold bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full">Cargando...</span>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Diplomados</h3>
+                        <span id="count-cursos" class="text-[10px] font-bold bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full">0</span>
                     </div>
-                    <form id="curso-form" class="grid grid-cols-3 gap-2 mb-6">
-                        <input type="text" id="nombre-curso" placeholder="Nombre Diplomado" required class="col-span-2 bg-slate-50 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
-                        <input type="number" id="sesiones-totales" placeholder="Sesiones" required class="col-span-1 bg-slate-50 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
-                        <button type="submit" class="col-span-3 bg-emerald-500 text-white py-2 rounded-xl font-bold transition-all active:scale-95">+ Crear Diplomado</button>
+                    <form id="curso-form" class="space-y-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <input type="hidden" id="edit-curso-id">
+                        <input type="text" id="nombre-curso" placeholder="Nombre Diplomado" required class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 font-bold">
+                        <input type="number" id="sesiones-totales" placeholder="Número de Sesiones" required class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500">
+                        <div class="flex gap-2">
+                            <button type="submit" id="btn-submit-curso" class="flex-1 bg-emerald-500 text-white py-2 rounded-xl font-bold transition-all active:scale-95 text-sm uppercase">Guardar Diplomado</button>
+                            <button type="button" id="btn-cancel-curso" onclick="cancelarEdicionCurso()" class="hidden bg-slate-200 text-slate-600 font-bold px-4 py-2 rounded-xl text-sm transition-all">✕</button>
+                        </div>
                     </form>
                     <div id="ui-cursos" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar"></div>
                 </div>
@@ -181,7 +187,7 @@
         </section>
     </div>
 
-    <!-- MODAL DE HISTORIAL (SE ABRE AL TOCAR UN ALUMNO) -->
+    <!-- MODAL DE HISTORIAL -->
     <div id="modal-historial" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-indigo-600 text-white">
@@ -204,21 +210,12 @@
                 </div>
             </div>
 
-            <div class="p-4 bg-rose-50 border-b border-rose-100">
-                <label class="block text-[9px] font-bold text-rose-400 uppercase tracking-widest mb-1 italic">Pendientes o Notas de Cobro</label>
-                <div class="flex gap-2">
-                    <input type="text" id="input-pendiente" placeholder="Ej: Falta pagar inscripción" class="flex-1 text-xs border-none rounded-lg p-2 bg-white shadow-inner focus:ring-1 focus:ring-rose-400">
-                    <button onclick="guardarPendiente()" class="bg-rose-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all active:scale-95">Anotar</button>
-                </div>
-                <div id="lista-pendientes" class="mt-2 flex flex-wrap gap-2"></div>
-            </div>
-
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50">
                 <div id="modal-lista-pagos" class="space-y-3"></div>
             </div>
             
             <div class="p-4 bg-white border-t border-slate-100 flex justify-between items-center">
-                <span class="text-xs font-bold text-slate-400 uppercase">Total histórico invertido</span>
+                <span class="text-xs font-bold text-slate-400 uppercase">Total histórico</span>
                 <span id="modal-total-alumno" class="text-xl font-bold text-emerald-600">$0</span>
             </div>
         </div>
@@ -228,7 +225,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Configuración Firebase (Oculta pero activa)
         const firebaseConfig = {
           apiKey: "AIzaSyCcAda5-ewiR78bfLyYrjEMhfdc0RFxd7s",
           authDomain: "finanzas-escuela.firebaseapp.com",
@@ -241,7 +237,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // Referencias de colecciones
         const transColl = collection(db, "transacciones");
         const alumColl = collection(db, "alumnos");
         const cursoColl = collection(db, "cursos");
@@ -249,7 +244,7 @@
         let transacciones = [], alumnos = [], cursos = [];
         let currentAlumnoId = null;
 
-        // --- SINCRONIZACIÓN REALTIME ---
+        // --- REALTIME ---
         onSnapshot(query(transColl, orderBy("timestamp", "desc")), (snap) => {
             transacciones = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderFinanzas();
@@ -270,16 +265,15 @@
 
         function setConnected() {
             const pill = document.getElementById('cloud-status');
-            const text = document.getElementById('status-text');
             const btn = document.getElementById('submit-btn');
             pill.classList.replace('bg-amber-400', 'bg-emerald-500');
             pill.classList.remove('animate-pulse');
-            text.innerText = "Sincronizado";
+            document.getElementById('status-text').innerText = "Sincronizado";
             btn.disabled = false;
             btn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg cursor-pointer uppercase transition-all";
         }
 
-        // --- REGISTRO DE TRANSACCIONES ---
+        // --- TRANSACCIONES ---
         document.getElementById('finance-form').onsubmit = async (e) => {
             e.preventDefault();
             const cat = document.getElementById('categoria').value;
@@ -288,28 +282,21 @@
             const fecha = document.getElementById('fecha').value;
             
             let data = {
-                fecha,
-                categoria: cat,
+                fecha, categoria: cat,
                 tipo: cat.startsWith('ingreso') ? 'ingreso' : 'egreso',
-                monto,
-                descripcion: nota,
-                timestamp: Date.now()
+                monto, descripcion: nota, timestamp: Date.now()
             };
 
-            // Lógica para pagos de alumnos permanentes
             if(cat === 'ingreso-clase') {
                 const alum = document.getElementById('select-alumno').value;
                 const curs = document.getElementById('select-curso').value;
                 const sesion = parseInt(document.getElementById('sesion-numero').value) || 0;
                 const mes = document.getElementById('mes-pagado').value;
-                
                 data.alumnoRel = alum; 
                 data.cursoRel = curs;
                 data.sesionNum = sesion;
-                data.descripcion = `[PAGO] ${alum} - ${curs} (Sesión ${sesion}) ${mes ? '- '+mes : ''} ${nota}`.trim();
-            } 
-            // Lógica para alumnos de talleres temporales
-            else if (cat === 'ingreso-taller') {
+                data.descripcion = `[PAGO] ${alum} - ${curs} (S${sesion}) ${mes ? '- '+mes : ''} ${nota}`.trim();
+            } else if (cat === 'ingreso-taller') {
                 const alumTemp = document.getElementById('taller-alumno-nombre').value;
                 const tallerNom = document.getElementById('taller-evento-nombre').value;
                 data.descripcion = `[TALLER] ${tallerNom}: ${alumTemp} ${nota}`.trim();
@@ -317,18 +304,13 @@
 
             try {
                 await addDoc(transColl, data);
-                // Limpiar campos específicos pero mantener fecha y categoría
                 document.getElementById('monto').value = '';
                 document.getElementById('sesion-numero').value = '';
-                document.getElementById('mes-pagado').value = '';
                 document.getElementById('taller-alumno-nombre').value = '';
                 document.getElementById('monto').focus();
-            } catch (err) {
-                console.error("Error guardando:", err);
-            }
+            } catch (err) { console.error(err); }
         };
 
-        // --- RENDERIZADO DE TABLAS ---
         function renderFinanzas() {
             const ui = document.getElementById('lista-transacciones');
             ui.innerHTML = '';
@@ -340,17 +322,17 @@
                 if(t.fecha === filtro) dia += (t.tipo === 'ingreso' ? t.monto : -t.monto);
 
                 const row = document.createElement('tr');
-                row.className = "hover:bg-slate-50 transition-colors";
+                row.className = "hover:bg-slate-50";
                 row.innerHTML = `
                     <td class="px-6 py-4">
-                        <div class="text-xs font-bold text-slate-800 uppercase tracking-tight">${t.descripcion}</div>
-                        <div class="text-[8px] font-bold text-indigo-400 uppercase mt-1">${t.categoria.replace(/-/g, ' ')} | ${t.fecha}</div>
+                        <div class="text-[11px] font-bold text-slate-800 uppercase tracking-tight">${t.descripcion}</div>
+                        <div class="text-[8px] font-bold text-indigo-400 uppercase mt-1">${t.categoria} | ${t.fecha}</div>
                     </td>
                     <td class="px-6 py-4 text-right font-bold text-sm ${t.tipo === 'ingreso' ? 'text-emerald-600' : 'text-rose-500'}">
                         $${t.monto.toLocaleString()}
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <button onclick="eliminarFila('${t.id}', 'transacciones')" class="text-slate-200 hover:text-rose-400">×</button>
+                        <button onclick="eliminarFila('${t.id}', 'transacciones')" class="text-slate-200 hover:text-rose-400 text-lg">×</button>
                     </td>
                 `;
                 ui.appendChild(row);
@@ -360,127 +342,156 @@
             document.getElementById('resumen-dia').innerText = `Balance Hoy: $${dia.toLocaleString()}`;
         }
 
-        // --- SECCIÓN ALUMNOS ---
+        // --- LÓGICA DE ALUMNOS (CON EDICIÓN) ---
         document.getElementById('alumno-form').onsubmit = async (e) => {
             e.preventDefault();
-            await addDoc(alumColl, { 
+            const id = document.getElementById('edit-alumno-id').value;
+            const data = {
                 nombre: document.getElementById('nombre-alumno').value,
                 curp: document.getElementById('curp-alumno').value,
-                tel: document.getElementById('tel-alumno').value,
-                pendientes: []
-            });
-            e.target.reset();
+                tel: document.getElementById('tel-alumno').value
+            };
+
+            if(id) {
+                await updateDoc(doc(db, "alumnos", id), data);
+            } else {
+                await addDoc(alumColl, { ...data, pendientes: [] });
+            }
+            cancelarEdicionAlumno();
+        };
+
+        window.prepararEditarAlumno = (id) => {
+            const a = alumnos.find(x => x.id === id);
+            if(!a) return;
+            document.getElementById('edit-alumno-id').value = a.id;
+            document.getElementById('nombre-alumno').value = a.nombre;
+            document.getElementById('curp-alumno').value = a.curp || '';
+            document.getElementById('tel-alumno').value = a.tel || '';
+            document.getElementById('btn-submit-alumno').innerText = 'Actualizar Datos';
+            document.getElementById('btn-cancel-alumno').classList.remove('hidden');
+            document.getElementById('nombre-alumno').focus();
+        };
+
+        window.cancelarEdicionAlumno = () => {
+            document.getElementById('alumno-form').reset();
+            document.getElementById('edit-alumno-id').value = '';
+            document.getElementById('btn-submit-alumno').innerText = 'Guardar Alumno';
+            document.getElementById('btn-cancel-alumno').classList.add('hidden');
         };
 
         function renderAlumnos() {
             const ui = document.getElementById('ui-alumnos');
-            const count = document.getElementById('count-alumnos');
-            count.innerText = `Total: ${alumnos.length}`;
-            
+            document.getElementById('count-alumnos').innerText = alumnos.length;
             ui.innerHTML = alumnos.map(a => `
-                <div class="group bg-slate-50 p-3 rounded-2xl hover:bg-white hover:shadow-md border border-transparent hover:border-indigo-100 transition-all flex justify-between items-center cursor-pointer" onclick="verHistorial('${a.id}')">
-                    <div class="flex-1 text-left flex flex-col">
-                        <span class="font-bold text-slate-700 text-sm">${a.nombre}</span>
-                        <span class="text-[8px] text-slate-400 font-bold uppercase">${a.tel || 'S/T'} | ${a.curp || 'S/C'}</span>
+                <div class="group bg-slate-50 p-3 rounded-2xl hover:bg-white border border-transparent hover:border-indigo-100 transition-all flex justify-between items-center cursor-pointer" onclick="verHistorial('${a.id}')">
+                    <div class="flex-1">
+                        <span class="font-bold text-slate-700 text-xs">${a.nombre}</span>
+                        <div class="text-[8px] text-slate-400 font-bold uppercase">${a.curp || 'SIN CURP'} | ${a.tel || 'SIN TEL'}</div>
                     </div>
-                    <button onclick="event.stopPropagation(); eliminarFila('${a.id}', 'alumnos')" class="opacity-0 group-hover:opacity-100 text-rose-300 hover:text-rose-600">×</button>
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="event.stopPropagation(); prepararEditarAlumno('${a.id}')" class="text-indigo-400 hover:text-indigo-600">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        <button onclick="event.stopPropagation(); eliminarFila('${a.id}', 'alumnos')" class="text-rose-300 hover:text-rose-600 font-bold text-lg">×</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // --- SECCIÓN DIPLOMADOS ---
+        // --- LÓGICA DE DIPLOMADOS (CON EDICIÓN) ---
         document.getElementById('curso-form').onsubmit = async (e) => {
             e.preventDefault();
-            await addDoc(cursoColl, { 
+            const id = document.getElementById('edit-curso-id').value;
+            const data = {
                 nombre: document.getElementById('nombre-curso').value,
                 sesiones: parseInt(document.getElementById('sesiones-totales').value) || 12
-            });
-            e.target.reset();
+            };
+
+            if(id) {
+                await updateDoc(doc(db, "cursos", id), data);
+            } else {
+                await addDoc(cursoColl, data);
+            }
+            cancelarEdicionCurso();
+        };
+
+        window.prepararEditarCurso = (id) => {
+            const c = cursos.find(x => x.id === id);
+            if(!c) return;
+            document.getElementById('edit-curso-id').value = c.id;
+            document.getElementById('nombre-curso').value = c.nombre;
+            document.getElementById('sesiones-totales').value = c.sesiones;
+            document.getElementById('btn-submit-curso').innerText = 'Actualizar Diplomado';
+            document.getElementById('btn-cancel-curso').classList.remove('hidden');
+            document.getElementById('nombre-curso').focus();
+        };
+
+        window.cancelarEdicionCurso = () => {
+            document.getElementById('curso-form').reset();
+            document.getElementById('edit-curso-id').value = '';
+            document.getElementById('btn-submit-curso').innerText = 'Guardar Diplomado';
+            document.getElementById('btn-cancel-curso').classList.add('hidden');
         };
 
         function renderCursos() {
-            const count = document.getElementById('count-cursos');
-            count.innerText = `Total: ${cursos.length}`;
-            
+            document.getElementById('count-cursos').innerText = cursos.length;
             document.getElementById('ui-cursos').innerHTML = cursos.map(c => `
-                <div class="flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-100">
+                <div class="group flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-100 hover:bg-white transition-all">
                     <div class="flex flex-col">
                         <span class="text-[10px] font-bold text-emerald-800 uppercase">${c.nombre}</span>
-                        <span class="text-[8px] font-bold text-emerald-600 uppercase italic">${c.sesiones || 0} sesiones totales</span>
+                        <span class="text-[8px] font-bold text-emerald-600 uppercase italic">${c.sesiones} sesiones</span>
                     </div>
-                    <button onclick="eliminarFila('${c.id}', 'cursos')" class="text-rose-300 px-2 font-bold hover:text-rose-600">×</button>
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button onclick="prepararEditarCurso('${c.id}')" class="text-emerald-400 hover:text-emerald-600">
+                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                         </button>
+                        <button onclick="eliminarFila('${c.id}', 'cursos')" class="text-rose-300 font-bold px-2 hover:text-rose-600">×</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // --- SELECTORES AUTOMÁTICOS ---
+        // --- SELECTORES ---
         function populateSelectors() {
             const selAlum = document.getElementById('select-alumno');
             const selCur = document.getElementById('select-curso');
-            
-            if(alumnos.length > 0) {
-                selAlum.innerHTML = alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
-            } else {
-                selAlum.innerHTML = '<option value="">No hay alumnos registrados</option>';
-            }
-
-            if(cursos.length > 0) {
-                selCur.innerHTML = cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
-            } else {
-                selCur.innerHTML = '<option value="">No hay diplomados creados</option>';
-            }
+            selAlum.innerHTML = alumnos.length > 0 ? alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('') : '<option value="">No hay alumnos</option>';
+            selCur.innerHTML = cursos.length > 0 ? cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('') : '<option value="">No hay diplomados</option>';
         }
 
-        // --- HISTORIAL INDIVIDUAL ---
+        // --- HISTORIAL ---
         window.verHistorial = (id) => {
             currentAlumnoId = id;
-            const alumno = alumnos.find(a => a.id === id);
-            if(!alumno) return;
-            
-            const modal = document.getElementById('modal-historial');
-            document.getElementById('modal-titulo-alumno').innerText = alumno.nombre;
-            document.getElementById('modal-subtitulo-alumno').innerText = `${alumno.tel || 'S/T'} | ${alumno.curp || 'S/C'}`;
-
-            const pagos = transacciones.filter(t => t.alumnoRel === alumno.nombre);
-            
+            const a = alumnos.find(x => x.id === id);
+            if(!a) return;
+            document.getElementById('modal-titulo-alumno').innerText = a.nombre;
+            document.getElementById('modal-subtitulo-alumno').innerText = `${a.tel || 'S/T'} | ${a.curp || 'S/C'}`;
+            const pagos = transacciones.filter(t => t.alumnoRel === a.nombre);
             renderProgreso(pagos);
             renderListaPagos(pagos);
-            renderPendientes(alumno.pendientes || []);
-            modal.classList.remove('hidden');
+            document.getElementById('modal-historial').classList.remove('hidden');
         };
 
         function renderProgreso(pagos) {
-            const wrapper = document.getElementById('modal-progreso-wrapper');
-            const barra = document.getElementById('modal-barra-progreso');
-            const labelSesiones = document.getElementById('modal-sesiones-restantes');
-            const labelCurso = document.getElementById('modal-label-progreso');
-
+            const wrap = document.getElementById('modal-progreso-wrapper');
             if(pagos.length > 0 && pagos[0].cursoRel) {
-                const cursoNombre = pagos[0].cursoRel;
-                const cursoData = cursos.find(c => c.nombre === cursoNombre);
-                
-                if(cursoData) {
-                    const sesionesPagadas = pagos.map(p => p.sesionNum || 0);
-                    const ultimaSesion = Math.max(...sesionesPagadas, 0);
-                    const totales = cursoData.sesiones || 1;
-                    const faltantes = Math.max(0, totales - ultimaSesion);
-                    const porcentaje = Math.min(100, (ultimaSesion / totales) * 100);
-
-                    wrapper.classList.remove('hidden');
-                    labelCurso.innerText = `Diplomado: ${cursoNombre}`;
-                    labelSesiones.innerText = faltantes > 0 ? `Faltan ${faltantes} sesiones` : "¡Curso completado!";
-                    barra.style.width = `${porcentaje}%`;
-                } else { wrapper.classList.add('hidden'); }
-            } else { wrapper.classList.add('hidden'); }
+                const c = cursos.find(x => x.nombre === pagos[0].cursoRel);
+                if(c) {
+                    const maxS = Math.max(...pagos.map(p => p.sesionNum || 0), 0);
+                    const perc = Math.min(100, (maxS / c.sesiones) * 100);
+                    wrap.classList.remove('hidden');
+                    document.getElementById('modal-label-progreso').innerText = `Diplomado: ${c.nombre}`;
+                    document.getElementById('modal-sesiones-restantes').innerText = (c.sesiones - maxS) > 0 ? `Faltan ${c.sesiones - maxS} sesiones` : "¡Graduado!";
+                    document.getElementById('modal-barra-progreso').style.width = `${perc}%`;
+                } else wrap.classList.add('hidden');
+            } else wrap.classList.add('hidden');
         }
 
         function renderListaPagos(pagos) {
             const ui = document.getElementById('modal-lista-pagos');
-            const totalUI = document.getElementById('modal-total-alumno');
-            let total = 0;
-
+            let t = 0;
             ui.innerHTML = pagos.map(p => {
-                total += p.monto;
+                t += p.monto;
                 return `
                     <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex justify-between">
                         <div>
@@ -490,75 +501,44 @@
                         <div class="font-bold text-emerald-600 text-xs">$${p.monto.toLocaleString()}</div>
                     </div>
                 `;
-            }).join('') || '<div class="text-center text-slate-400 text-xs font-bold py-4 italic">No se encontraron pagos históricos</div>';
-            totalUI.innerText = `$${total.toLocaleString()}`;
+            }).join('') || '<p class="text-center text-slate-400 text-[10px] py-4">Sin pagos registrados</p>';
+            document.getElementById('modal-total-alumno').innerText = `$${t.toLocaleString()}`;
         }
-
-        function renderPendientes(lista) {
-            const ui = document.getElementById('lista-pendientes');
-            ui.innerHTML = lista.map((p, i) => `
-                <span class="bg-rose-100 text-rose-700 px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1">
-                    ${p}
-                    <button onclick="borrarPendiente(${i})" class="hover:text-rose-900">×</button>
-                </span>
-            `).join('');
-        }
-
-        window.guardarPendiente = async () => {
-            const val = document.getElementById('input-pendiente').value;
-            if(!val) return;
-            const alumno = alumnos.find(a => a.id === currentAlumnoId);
-            const nuevos = [...(alumno.pendientes || []), val];
-            await updateDoc(doc(db, "alumnos", currentAlumnoId), { pendientes: nuevos });
-            document.getElementById('input-pendiente').value = '';
-            renderPendientes(nuevos);
-        };
-
-        window.borrarPendiente = async (idx) => {
-            const alumno = alumnos.find(a => a.id === currentAlumnoId);
-            const nuevos = alumno.pendientes.filter((_, i) => i !== idx);
-            await updateDoc(doc(db, "alumnos", currentAlumnoId), { pendientes: nuevos });
-            renderPendientes(nuevos);
-        };
 
         window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
 
-        // --- HELPERS GENERALES ---
+        // --- INICIO ---
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById('fecha').value = hoy;
         document.getElementById('filtro-fecha').value = hoy;
         document.getElementById('filtro-fecha').onchange = () => renderFinanzas();
 
         window.eliminarFila = async (id, coll) => {
-            if(confirm('¿Deseas eliminar este registro de forma permanente?')) {
-                await deleteDoc(doc(db, coll, id));
-            }
+            if(confirm('¿Eliminar definitivamente?')) await deleteDoc(doc(db, coll, id));
         };
 
         window.switchTab = (tab) => {
-            const isFin = tab === 'finanzas';
-            document.getElementById('sec-finanzas').classList.toggle('hidden', !isFin);
-            document.getElementById('sec-alumnos').classList.toggle('hidden', isFin);
-            document.getElementById('btn-finanzas').className = isFin ? 'flex-1 py-4 text-sm font-bold uppercase tracking-widest tab-active' : 'flex-1 py-4 text-sm font-bold uppercase tracking-widest text-slate-400';
-            document.getElementById('btn-alumnos').className = !isFin ? 'flex-1 py-4 text-sm font-bold uppercase tracking-widest tab-active' : 'flex-1 py-4 text-sm font-bold uppercase tracking-widest text-slate-400';
+            const isF = tab === 'finanzas';
+            document.getElementById('sec-finanzas').classList.toggle('hidden', !isF);
+            document.getElementById('sec-alumnos').classList.toggle('hidden', isF);
+            document.getElementById('btn-finanzas').className = isF ? 'flex-1 py-4 text-sm font-bold uppercase tracking-widest tab-active' : 'flex-1 py-4 text-sm font-bold uppercase tracking-widest text-slate-400';
+            document.getElementById('btn-alumnos').className = !isF ? 'flex-1 py-4 text-sm font-bold uppercase tracking-widest tab-active' : 'flex-1 py-4 text-sm font-bold uppercase tracking-widest text-slate-400';
         };
 
         window.checkCategoryFields = () => {
-            const val = document.getElementById('categoria').value;
-            document.getElementById('wrapper-alumno-extra').classList.toggle('hidden', val !== 'ingreso-clase');
-            document.getElementById('wrapper-taller-extra').classList.toggle('hidden', val !== 'ingreso-taller');
+            const v = document.getElementById('categoria').value;
+            document.getElementById('wrapper-alumno-extra').classList.toggle('hidden', v !== 'ingreso-clase');
+            document.getElementById('wrapper-taller-extra').classList.toggle('hidden', v !== 'ingreso-taller');
         };
 
         window.exportarCSV = () => {
-            let csv = "\uFEFFFecha,Movimiento,Importe\n";
+            let csv = "\uFEFFFecha,Detalle,Monto\n";
             transacciones.forEach(t => csv += `${t.fecha},"${t.descripcion}",${t.monto}\n`);
-            const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
             const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `Caja_Escuela_Terapias.csv`;
+            link.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+            link.download = `Caja_Escuela.csv`;
             link.click();
         };
-
     </script>
 </body>
 </html>
