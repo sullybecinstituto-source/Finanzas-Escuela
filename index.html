@@ -153,6 +153,18 @@
                 <form id="curso-form" class="space-y-3">
                     <input type="hidden" id="edit-id-curso">
                     <input type="text" id="nombre-curso" placeholder="Nombre del Diplomado" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Fecha Inicio</label>
+                            <input type="date" id="fecha-inicio-curso" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Fecha Término (Auto)</label>
+                            <input type="text" id="fecha-fin-curso-vista" readonly class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm font-bold text-indigo-600" placeholder="---">
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3">
                         <input type="number" id="duracion-curso" placeholder="Sesiones" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                         <input type="number" id="costo-clase" placeholder="Costo Sesión $" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
@@ -233,7 +245,6 @@
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm";
                 
-                // Mostrar fecha de clase si existe
                 const subtext = t.fechaClase ? 
                     `<span class="text-indigo-500 font-black">CLASE DEL: ${t.fechaClase}</span>` : 
                     `FECHA: ${t.fechaPago}`;
@@ -313,18 +324,48 @@
 
         window.renderCursos = () => {
             const ui = document.getElementById('ui-cursos');
-            ui.innerHTML = cursos.map(c => `
+            ui.innerHTML = cursos.map(c => {
+                const fin = calcularFechaTermino(c.fechaInicio, c.duracion, c.fechasInactivas);
+                return `
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center">
                     <div class="cursor-pointer flex-1" onclick="prepararEdicionCurso('${c.id}')">
                         <p class="font-black text-sm text-slate-800 uppercase">${c.nombre}</p>
                         <p class="text-[9px] font-bold text-slate-400 uppercase">${c.duracion} Sesiones • $${c.costo}</p>
-                        ${c.fechasInactivas && JSON.parse(c.fechasInactivas).length > 0 ? 
-                            `<p class="text-[7px] text-rose-400 font-bold uppercase mt-1">${JSON.parse(c.fechasInactivas).length} fechas sin clase registradas</p>` : ''}
+                        <p class="text-[8px] font-black text-indigo-500 uppercase mt-1">DEL ${c.fechaInicio} AL ${fin}</p>
                     </div>
                     <button onclick="eliminarDoc('cursos', '${c.id}')" class="text-rose-300 text-[8px] font-bold uppercase">Borrar</button>
                 </div>
-            `).join('');
+            `}).join('');
         }
+
+        function calcularFechaTermino(inicio, sesiones, inactivasStr) {
+            if(!inicio || !sesiones) return "---";
+            let fecha = new Date(inicio + "T00:00:00");
+            let sesionesRestantes = parseInt(sesiones);
+            const inactivas = inactivasStr ? JSON.parse(inactivasStr) : [];
+            
+            let contador = 0;
+            while(contador < sesionesRestantes - 1) {
+                fecha.setDate(fecha.getDate() + 7);
+                let check = fecha.toISOString().split('T')[0];
+                if(!inactivas.includes(check)) {
+                    contador++;
+                }
+            }
+            return fecha.toISOString().split('T')[0];
+        }
+
+        const inputsCursoTrigger = ['fecha-inicio-curso', 'duracion-curso'];
+        inputsCursoTrigger.forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                const fin = calcularFechaTermino(
+                    document.getElementById('fecha-inicio-curso').value,
+                    document.getElementById('duracion-curso').value,
+                    document.getElementById('fechas-inactivas-json').value
+                );
+                document.getElementById('fecha-fin-curso-vista').value = fin;
+            });
+        });
 
         function populateSelects() {
             const sA = document.getElementById('select-alumno');
@@ -337,12 +378,18 @@
             const fInput = document.getElementById('fecha-sin-clase');
             const listaJson = document.getElementById('fechas-inactivas-json');
             if(!fInput.value) return;
-
             let fechas = JSON.parse(listaJson.value || "[]");
             if(!fechas.includes(fInput.value)) {
                 fechas.push(fInput.value);
                 listaJson.value = JSON.stringify(fechas);
                 actualizarListaVisualInactivas(fechas);
+                // Forzar recalculado de fecha fin
+                const fin = calcularFechaTermino(
+                    document.getElementById('fecha-inicio-curso').value,
+                    document.getElementById('duracion-curso').value,
+                    listaJson.value
+                );
+                document.getElementById('fecha-fin-curso-vista').value = fin;
             }
             fInput.value = "";
         };
@@ -353,6 +400,12 @@
             fechas = fechas.filter(x => x !== f);
             listaJson.value = JSON.stringify(fechas);
             actualizarListaVisualInactivas(fechas);
+            const fin = calcularFechaTermino(
+                    document.getElementById('fecha-inicio-curso').value,
+                    document.getElementById('duracion-curso').value,
+                    listaJson.value
+            );
+            document.getElementById('fecha-fin-curso-vista').value = fin;
         };
 
         function actualizarListaVisualInactivas(fechas) {
@@ -375,8 +428,11 @@
             document.getElementById('num-sesion').value = pagadas + 1;
             document.getElementById('monto').value = c ? c.costo : 0;
 
-            if(a.fechaInicio) {
-                let fechaBase = new Date(a.fechaInicio + "T00:00:00");
+            // PRIORIDAD: Si el curso tiene fecha de inicio, usar esa como base para que no se desfase a 2026
+            const fechaBaseStr = (a.fechaInicio && a.fechaInicio !== "") ? a.fechaInicio : (c?.fechaInicio || "");
+            
+            if(fechaBaseStr) {
+                let fechaBase = new Date(fechaBaseStr + "T00:00:00");
                 let fechasInactivas = c?.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
                 
                 let clasesPorSaltar = pagadas;
@@ -429,10 +485,14 @@
             document.getElementById('nombre-curso').value = c.nombre;
             document.getElementById('duracion-curso').value = c.duracion;
             document.getElementById('costo-clase').value = c.costo;
+            document.getElementById('fecha-inicio-curso').value = c.fechaInicio || '';
             
             const fechas = c.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
             document.getElementById('fechas-inactivas-json').value = JSON.stringify(fechas);
             actualizarListaVisualInactivas(fechas);
+
+            const fin = calcularFechaTermino(c.fechaInicio, c.duracion, c.fechasInactivas);
+            document.getElementById('fecha-fin-curso-vista').value = fin;
 
             document.getElementById('form-curso-title').innerText = "Editando Diplomado: " + c.nombre;
             document.getElementById('btn-submit-curso').innerText = "Actualizar";
@@ -444,6 +504,7 @@
             document.getElementById('edit-id-curso').value = "";
             document.getElementById('fechas-inactivas-json').value = "[]";
             document.getElementById('lista-fechas-inactivas').innerHTML = "";
+            document.getElementById('fecha-fin-curso-vista').value = "";
             document.getElementById('form-curso-title').innerText = "Nuevo Diplomado";
             document.getElementById('btn-submit-curso').innerText = "Guardar Curso";
             document.getElementById('btn-cancelar-curso').classList.add('hidden');
@@ -470,6 +531,7 @@
                 nombre: document.getElementById('nombre-curso').value,
                 duracion: document.getElementById('duracion-curso').value,
                 costo: document.getElementById('costo-clase').value,
+                fechaInicio: document.getElementById('fecha-inicio-curso').value,
                 fechasInactivas: document.getElementById('fechas-inactivas-json').value
             };
             id ? await updateDoc(doc(db, "cursos", id), data) : await addDoc(collection(db, "cursos"), data);
