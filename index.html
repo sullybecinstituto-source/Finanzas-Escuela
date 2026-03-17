@@ -2,241 +2,226 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Escuela - Saldo Disponible</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SullyBec App">
+    <title>SullyBec Instituto - Gestión</title>
+    
+    <!-- Iconos para móvil -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1077/1077976.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1077/1077976.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .balance-card { background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        
+        :root {
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --primary-color: #6366f1; /* Indigo */
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            padding-top: var(--safe-area-top);
+            padding-bottom: var(--safe-area-bottom);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tab-active { color: var(--primary-color); font-weight: 800; border-bottom: 3px solid var(--primary-color); }
+        
+        input, select, button { font-size: 16px !important; }
+        
+        .balance-card { 
+            background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo-img {
+            height: 36px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Animación para el estatus */
+        .dot-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-12 text-slate-900">
+<body class="bg-slate-50 min-h-screen text-slate-900 overflow-x-hidden">
 
-    <div class="max-w-4xl mx-auto px-4 pt-8">
-        <!-- Encabezado con Totales y Saldo Disponible -->
-        <header class="mb-8">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight text-center md:text-left">Escuela & Consultorio</h1>
-                    <div class="flex items-center justify-center md:justify-start gap-2 mt-1">
-                        <span id="cloud-status" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                        <p id="status-text" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest italic">Conectando...</p>
-                    </div>
+    <!-- Header Personalizado SullyBec -->
+    <div class="sticky-header px-4 py-3 border-b border-slate-200">
+        <div class="flex justify-between items-center max-w-4xl mx-auto">
+            <div class="flex items-center gap-3">
+                <!-- CONTENEDOR DEL LOGO -->
+                <div id="logo-container" class="bg-white border border-slate-100 p-1 rounded-lg overflow-hidden flex items-center justify-center shadow-sm" style="width: 44px; height: 44px;">
+                    <img id="main-logo" src="" alt="SullyBec Logo" class="logo-img">
+                </div>
+                <h1 class="text-lg font-extrabold tracking-tight text-indigo-950">SullyBec <span class="text-indigo-600">Instituto</span></h1>
+            </div>
+            <div class="flex flex-col items-end">
+                <div class="flex items-center gap-1.5">
+                    <span id="cloud-status" class="w-2 h-2 rounded-full bg-amber-400 dot-pulse"></span>
+                    <p id="status-text" class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Cargando</p>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Dashboard de Dinero -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="balance-card p-5 rounded-3xl shadow-xl text-white md:col-span-1 flex flex-col justify-center">
-                    <p class="text-[10px] font-bold opacity-80 uppercase tracking-[0.2em]">Saldo Disponible</p>
-                    <p id="total-balance" class="text-3xl font-black tracking-tight mt-1">$0</p>
-                </div>
+    <div class="max-w-4xl mx-auto px-4 pt-4 pb-24">
+        <!-- Saldo Disponible -->
+        <div class="balance-card p-6 rounded-[2rem] text-white mb-6 relative overflow-hidden">
+            <div class="relative z-10">
+                <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Saldo Institucional Actual</p>
+                <h2 id="total-balance" class="text-4xl font-black mt-1">$0</h2>
                 
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex md:col-span-2 justify-around items-center">
-                    <div class="text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Ingresos</p>
-                        <p id="total-ingresos" class="text-xl font-bold text-emerald-600">$0</p>
+                <div class="flex justify-between mt-6 pt-6 border-t border-white/20">
+                    <div>
+                        <p class="text-[9px] font-bold opacity-70 uppercase">Total Ingresos</p>
+                        <p id="total-ingresos" class="text-lg font-bold text-emerald-300">$0</p>
                     </div>
-                    <div class="h-8 border-l border-slate-100"></div>
-                    <div class="text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Egresos</p>
-                        <p id="total-egresos" class="text-xl font-bold text-rose-500">$0</p>
+                    <div class="text-right">
+                        <p class="text-[9px] font-bold opacity-70 uppercase">Total Egresos</p>
+                        <p id="total-egresos" class="text-lg font-bold text-rose-300">$0</p>
                     </div>
                 </div>
             </div>
-        </header>
+            <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full"></div>
+        </div>
 
-        <!-- Navegación de Pestañas -->
-        <nav class="flex border-b border-slate-200 mb-6 bg-white rounded-t-3xl overflow-hidden shadow-sm">
-            <button onclick="switchTab('finanzas')" id="btn-finanzas" class="flex-1 py-4 text-xs font-black uppercase tracking-widest tab-active">Finanzas</button>
-            <button onclick="switchTab('alumnos')" id="btn-alumnos" class="flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Alumnos y Registro</button>
+        <!-- Navegación -->
+        <nav class="flex mb-6 bg-white p-1 rounded-2xl shadow-sm border border-slate-200">
+            <button onclick="switchTab('finanzas')" id="btn-finanzas" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest tab-active transition-all">Contabilidad</button>
+            <button onclick="switchTab('alumnos')" id="btn-alumnos" class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all">Alumnos</button>
         </nav>
 
         <!-- SECCIÓN FINANZAS -->
-        <section id="sec-finanzas">
-            <div class="glass border border-slate-200 rounded-3xl p-6 mb-8 shadow-xl">
-                <form id="finance-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="md:col-span-1">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-widest">Fecha</label>
-                        <input type="date" id="fecha" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
+        <section id="sec-finanzas" class="space-y-6">
+            <div class="flex items-center justify-between px-1">
+                <input type="date" id="filtro-fecha" class="bg-white border-slate-200 rounded-xl px-3 py-2 text-xs font-bold shadow-sm outline-none">
+                <p id="resumen-dia" class="text-[10px] font-black text-indigo-500 bg-indigo-50 px-3 py-2 rounded-lg"></p>
+            </div>
+
+            <div id="container-form" class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Añadir Operación</h3>
+                <form id="finance-form" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Fecha</label>
+                            <input type="date" id="fecha" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Monto ($)</label>
+                            <input type="number" id="monto" step="0.01" placeholder="0.00" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
+                        </div>
                     </div>
-                    <div class="md:col-span-1">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-widest">Categoría</label>
-                        <select id="categoria" onchange="checkCategoryFields()" class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-medium">
+
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Categoría</label>
+                        <select id="categoria" onchange="checkCategoryFields()" class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm appearance-none">
                             <optgroup label="Ingresos">
-                                <option value="ingreso-clase" selected>Pago Alumno (Diplomado)</option>
-                                <option value="ingreso-taller">Pago Taller (Única vez)</option>
+                                <option value="ingreso-clase">Pago Alumno (Diplomado)</option>
+                                <option value="ingreso-taller">Pago Taller / Curso</option>
                                 <option value="ingreso-paciente">Atención Paciente</option>
                                 <option value="ingreso-otro">Otro Ingreso</option>
                             </optgroup>
                             <optgroup label="Egresos">
                                 <option value="egreso-profesor">Pago Profesor</option>
-                                <option value="egreso-insumos">Insumos/Materiales</option>
-                                <option value="egreso-otros">Otros Egresos</option>
+                                <option value="egreso-insumos">Materiales / Insumos</option>
+                                <option value="egreso-renta">Gastos Operativos</option>
+                                <option value="egreso-otros">Otros Gastos</option>
                             </optgroup>
                         </select>
                     </div>
-                    <div class="md:col-span-1">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-widest">Monto ($)</label>
-                        <input type="number" id="monto" step="0.01" placeholder="0.00" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold text-slate-700">
-                    </div>
-                    <div class="md:col-span-1 flex items-end">
-                        <button type="submit" id="submit-btn" disabled class="w-full bg-slate-400 text-white font-bold py-3 rounded-xl shadow-lg opacity-50 cursor-not-allowed uppercase text-[10px] tracking-widest transition-all">Registrar</button>
-                    </div>
-                    
-                    <div id="wrapper-alumno-extra" class="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
-                        <div class="md:col-span-1">
-                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Alumno</label>
-                            <select id="select-alumno" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold text-indigo-800">
-                                <option value="">Cargando...</option>
-                            </select>
+
+                    <div id="wrapper-alumno-extra" class="bg-indigo-50 p-4 rounded-2xl space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="select-alumno" class="w-full bg-white border-none rounded-lg p-2 text-xs font-bold"></select>
+                            <select id="select-curso" class="w-full bg-white border-none rounded-lg p-2 text-xs font-bold"></select>
                         </div>
-                        <div class="md:col-span-1">
-                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Diplomado</label>
-                            <select id="select-curso" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold text-indigo-800">
-                                <option value="">Cargando...</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-1">
-                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase"># Sesión</label>
-                            <input type="number" id="sesion-numero" placeholder="Ej: 3" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
-                        </div>
-                        <div class="md:col-span-1">
-                            <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Mes</label>
-                            <input type="text" id="mes-pagado" placeholder="Ej: Marzo" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="sesion-numero" placeholder="# Sesión" class="w-full bg-white border-none rounded-lg p-2 text-xs font-bold">
+                            <input type="text" id="mes-pagado" placeholder="Mes" class="w-full bg-white border-none rounded-lg p-2 text-xs font-bold">
                         </div>
                     </div>
 
-                    <div id="wrapper-taller-extra" class="md:col-span-4 hidden bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-emerald-600 mb-1 uppercase">Nombre Alumno (Taller)</label>
-                                <input type="text" id="taller-alumno-nombre" placeholder="Nombre completo" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 font-bold">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-emerald-600 mb-1 uppercase">Nombre del Taller</label>
-                                <input type="text" id="taller-evento-nombre" placeholder="Ej: Reiki Nivel 1" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 font-bold">
-                            </div>
-                        </div>
+                    <div id="wrapper-taller-extra" class="hidden bg-emerald-50 p-4 rounded-2xl space-y-3">
+                        <input type="text" id="taller-alumno-nombre" placeholder="Nombre Alumno" class="w-full bg-white border-none rounded-lg p-2 text-xs font-bold">
+                        <input type="text" id="taller-evento-nombre" placeholder="Nombre del Taller" class="w-full bg-white border-none rounded-lg p-2 text-xs font-bold">
                     </div>
 
-                    <div id="wrapper-desc" class="md:col-span-4">
-                        <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-widest">Referencia / Nota</label>
-                        <input type="text" id="descripcion" placeholder="Ej: Pago en efectivo" class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
-                    </div>
+                    <input type="text" id="descripcion" placeholder="Nota adicional" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm">
+
+                    <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-xs tracking-widest active:scale-[0.98] transition-all">Guardar Registro</button>
                 </form>
             </div>
 
-            <!-- Listado Principal -->
-            <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4 px-2">
-                <div class="flex items-center gap-2">
-                    <input type="date" id="filtro-fecha" class="border-none bg-white shadow-sm rounded-lg p-2 text-xs text-slate-700 font-bold">
-                    <p id="resumen-dia" class="text-[10px] font-black text-slate-400 uppercase tracking-tighter"></p>
-                </div>
-                <button onclick="exportarCSV()" class="text-[10px] font-bold text-indigo-600 bg-white px-4 py-2 rounded-xl shadow-sm border border-indigo-50 uppercase tracking-widest">Exportar Excel</button>
-            </div>
-
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-slate-400 text-[9px] uppercase tracking-[0.2em] font-bold">
-                        <tr>
-                            <th class="px-6 py-4">Descripción</th>
-                            <th class="px-6 py-4 text-right">Monto</th>
-                            <th class="px-6 py-4"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="lista-transacciones" class="divide-y divide-slate-100"></tbody>
-                </table>
+            <div class="space-y-3">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Movimientos del Día</h3>
+                <div id="lista-transacciones" class="space-y-2"></div>
             </div>
         </section>
 
-        <!-- SECCIÓN ALUMNOS Y REGISTRO -->
-        <section id="sec-alumnos" class="hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Registro de Alumnos -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Alumnos</h3>
-                        <span id="count-alumnos" class="text-[10px] font-bold bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span>
+        <!-- SECCIÓN ALUMNOS -->
+        <section id="sec-alumnos" class="hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Registrar Alumno Nuevo</h3>
+                <form id="alumno-form" class="space-y-3">
+                    <input type="text" id="nombre-alumno" placeholder="Nombre Completo" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="curp-alumno" placeholder="Identificación" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm uppercase">
+                        <input type="tel" id="tel-alumno" placeholder="WhatsApp" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm">
                     </div>
-                    <form id="alumno-form" class="space-y-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                        <input type="hidden" id="edit-alumno-id">
-                        <input type="text" id="nombre-alumno" placeholder="Nombre completo" required class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="curp-alumno" placeholder="CURP" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 uppercase">
-                            <input type="tel" id="tel-alumno" placeholder="Teléfono" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div class="flex gap-2">
-                            <button type="submit" id="btn-submit-alumno" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl shadow-md transition-all active:scale-95 text-xs uppercase tracking-widest">Guardar Alumno</button>
-                            <button type="button" id="btn-cancel-alumno" onclick="cancelarEdicionAlumno()" class="hidden bg-slate-200 text-slate-600 font-bold px-4 py-2 rounded-xl text-xs transition-all">✕</button>
-                        </div>
-                    </form>
-                    <div id="ui-alumnos" class="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto custom-scrollbar"></div>
-                </div>
-
-                <!-- Diplomados -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Diplomados</h3>
-                        <span id="count-cursos" class="text-[10px] font-bold bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full">0</span>
-                    </div>
-                    <form id="curso-form" class="space-y-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                        <input type="hidden" id="edit-curso-id">
-                        <input type="text" id="nombre-curso" placeholder="Nombre Diplomado" required class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 font-bold">
-                        <input type="number" id="sesiones-totales" placeholder="# Sesiones" required class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500">
-                        <div class="flex gap-2">
-                            <button type="submit" id="btn-submit-curso" class="flex-1 bg-emerald-500 text-white py-2 rounded-xl font-bold transition-all active:scale-95 text-xs uppercase tracking-widest">Guardar Diplomado</button>
-                            <button type="button" id="btn-cancel-curso" onclick="cancelarEdicionCurso()" class="hidden bg-slate-200 text-slate-600 font-bold px-4 py-2 rounded-xl text-xs transition-all">✕</button>
-                        </div>
-                    </form>
-                    <div id="ui-cursos" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar"></div>
-                </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-widest">Crear Ficha</button>
+                </form>
             </div>
+            <div id="ui-alumnos" class="grid grid-cols-1 gap-2"></div>
         </section>
     </div>
 
-    <!-- MODAL DE HISTORIAL -->
-    <div id="modal-historial" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-indigo-600 text-white">
-                <div>
-                    <h2 id="modal-titulo-alumno" class="text-xl font-bold italic">Nombre</h2>
-                    <p id="modal-subtitulo-alumno" class="text-[10px] uppercase font-bold opacity-80 tracking-widest">Cargando...</p>
-                </div>
-                <button onclick="cerrarModal()" class="bg-white/20 hover:bg-white/40 p-2 rounded-full transition-colors">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+    <!-- Modal Historial -->
+    <div id="modal-historial" class="fixed inset-0 bg-white z-[100] hidden flex flex-col">
+        <div class="p-6 bg-indigo-700 text-white flex justify-between items-end pb-8">
+            <div>
+                <h2 id="modal-titulo-alumno" class="text-2xl font-black italic">Nombre</h2>
+                <p id="modal-subtitulo-alumno" class="text-[9px] font-black opacity-70 uppercase tracking-[0.2em] mt-1">SullyBec Instituto</p>
             </div>
-            
-            <div id="modal-progreso-wrapper" class="p-4 bg-indigo-50 border-b border-indigo-100 hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <span id="modal-label-progreso" class="text-[10px] font-bold text-indigo-600 uppercase">Progreso</span>
-                    <span id="modal-sesiones-restantes" class="text-[10px] font-bold text-indigo-800 uppercase bg-white px-2 py-1 rounded-full shadow-sm">Calculando...</span>
-                </div>
-                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                    <div id="modal-barra-progreso" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50">
-                <div id="modal-lista-pagos" class="space-y-3"></div>
-            </div>
-            
-            <div class="p-4 bg-white border-t border-slate-100 flex justify-between items-center">
-                <span class="text-xs font-bold text-slate-400 uppercase">Total histórico</span>
-                <span id="modal-total-alumno" class="text-xl font-bold text-emerald-600">$0</span>
-            </div>
+            <button onclick="cerrarModal()" class="bg-white/20 p-3 rounded-2xl">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"/></svg>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6 space-y-3 bg-slate-50" id="modal-lista-pagos"></div>
+        <div class="p-6 bg-white border-t border-slate-100 flex justify-between items-center shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+            <span class="text-xs font-black text-slate-400 uppercase">Aportación Total</span>
+            <span id="modal-total-alumno" class="text-2xl font-black text-indigo-600">$0</span>
         </div>
     </div>
 
     <script type="module">
+        // --- CONFIGURACIÓN DEL LOGO SULLYBEC ---
+        // Se utiliza un convertidor de enlace para que Drive permita la visualización directa
+        const URL_MI_LOGO = "https://lh3.googleusercontent.com/d/1gjM8QJhfynpT0il86P3IRWwD_wMQWcCC"; 
+        
+        document.getElementById('main-logo').src = URL_MI_LOGO;
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCcAda5-ewiR78bfLyYrjEMhfdc0RFxd7s",
@@ -256,7 +241,6 @@
 
         let transacciones = [], alumnos = [], cursos = [];
 
-        // --- REALTIME LISTENERS ---
         onSnapshot(query(transColl, orderBy("timestamp", "desc")), (snap) => {
             transacciones = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderFinanzas();
@@ -271,265 +255,71 @@
 
         onSnapshot(query(cursoColl, orderBy("nombre", "asc")), (snap) => {
             cursos = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            renderCursos();
             populateSelectors();
         });
 
         function setConnected() {
             const pill = document.getElementById('cloud-status');
-            const btn = document.getElementById('submit-btn');
-            pill.classList.replace('bg-amber-400', 'bg-emerald-500');
-            pill.classList.remove('animate-pulse');
+            pill.className = "w-2 h-2 rounded-full bg-emerald-500";
             document.getElementById('status-text').innerText = "Sincronizado";
-            btn.disabled = false;
-            btn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg cursor-pointer uppercase text-[10px] tracking-widest transition-all";
         }
 
-        // --- RENDERING FINANZAS (Lógica de Balance Actualizada) ---
         function renderFinanzas() {
             const ui = document.getElementById('lista-transacciones');
             ui.innerHTML = '';
             const filtro = document.getElementById('filtro-fecha').value;
-            let ing = 0, egr = 0, dia = 0;
+            let ing = 0, egr = 0, diaTotal = 0;
 
             transacciones.forEach(t => {
                 const m = parseFloat(t.monto);
                 if(t.tipo === 'ingreso') ing += m; else egr += m;
-                if(t.fecha === filtro) dia += (t.tipo === 'ingreso' ? m : -m);
-
-                const row = document.createElement('tr');
-                row.className = "hover:bg-slate-50";
-                row.innerHTML = `
-                    <td class="px-6 py-4">
-                        <div class="text-[11px] font-bold text-slate-800 uppercase tracking-tight">${t.descripcion}</div>
-                        <div class="text-[8px] font-bold text-indigo-400 uppercase mt-1">${t.categoria} | ${t.fecha}</div>
-                    </td>
-                    <td class="px-6 py-4 text-right font-bold text-sm ${t.tipo === 'ingreso' ? 'text-emerald-600' : 'text-rose-500'}">
-                        $${m.toLocaleString()}
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <button onclick="eliminarFila('${t.id}', 'transacciones')" class="text-slate-200 hover:text-rose-400 text-lg">×</button>
-                    </td>
-                `;
-                ui.appendChild(row);
+                
+                if(t.fecha === filtro) {
+                    diaTotal += (t.tipo === 'ingreso' ? m : -m);
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center";
+                    card.innerHTML = `
+                        <div class="flex-1">
+                            <p class="text-[11px] font-black text-slate-800 uppercase tracking-tight">${t.descripcion}</p>
+                            <p class="text-[8px] font-bold text-indigo-400 uppercase mt-1">${t.categoria}</p>
+                        </div>
+                        <div class="text-right ml-4">
+                            <p class="font-black text-sm ${t.tipo === 'ingreso' ? 'text-emerald-600' : 'text-rose-500'}">
+                                ${t.tipo === 'ingreso' ? '+' : '-'}$${m.toLocaleString()}
+                            </p>
+                        </div>
+                    `;
+                    ui.appendChild(card);
+                }
             });
 
-            // Actualización de indicadores
+            if(ui.innerHTML === '') ui.innerHTML = `<div class="text-center py-8 text-slate-300 font-bold uppercase text-[9px] tracking-widest">No hay movimientos registrados hoy</div>`;
+
             document.getElementById('total-ingresos').innerText = `$${ing.toLocaleString()}`;
             document.getElementById('total-egresos').innerText = `$${egr.toLocaleString()}`;
-            
-            // CÁLCULO DE SALDO DISPONIBLE
-            const balance = ing - egr;
-            const balUI = document.getElementById('total-balance');
-            balUI.innerText = `$${balance.toLocaleString()}`;
-            balUI.className = `text-3xl font-black tracking-tight mt-1 ${balance < 0 ? 'text-rose-200' : 'text-white'}`;
-
-            document.getElementById('resumen-dia').innerText = `Balance Hoy: $${dia.toLocaleString()}`;
+            document.getElementById('total-balance').innerText = `$${(ing - egr).toLocaleString()}`;
+            document.getElementById('resumen-dia').innerText = `Balance: $${diaTotal.toLocaleString()}`;
         }
-
-        // --- FORMULARIO TRANSACCIONES ---
-        document.getElementById('finance-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const cat = document.getElementById('categoria').value;
-            const monto = parseFloat(document.getElementById('monto').value);
-            const nota = document.getElementById('descripcion').value;
-            const fecha = document.getElementById('fecha').value;
-            
-            let data = {
-                fecha, categoria: cat,
-                tipo: cat.startsWith('ingreso') ? 'ingreso' : 'egreso',
-                monto, descripcion: nota, timestamp: Date.now()
-            };
-
-            if(cat === 'ingreso-clase') {
-                const alum = document.getElementById('select-alumno').value;
-                const curs = document.getElementById('select-curso').value;
-                const sesion = parseInt(document.getElementById('sesion-numero').value) || 0;
-                const mes = document.getElementById('mes-pagado').value;
-                data.alumnoRel = alum; 
-                data.cursoRel = curs;
-                data.sesionNum = sesion;
-                data.descripcion = `[PAGO] ${alum} - ${curs} (S${sesion}) ${mes ? '- '+mes : ''} ${nota}`.trim();
-            } else if (cat === 'ingreso-taller') {
-                const alumTemp = document.getElementById('taller-alumno-nombre').value;
-                const tallerNom = document.getElementById('taller-evento-nombre').value;
-                data.descripcion = `[TALLER] ${tallerNom}: ${alumTemp} ${nota}`.trim();
-            }
-
-            try {
-                await addDoc(transColl, data);
-                document.getElementById('monto').value = '';
-                document.getElementById('sesion-numero').value = '';
-                document.getElementById('monto').focus();
-            } catch (err) { console.error(err); }
-        };
-
-        // --- LÓGICA ALUMNOS ---
-        document.getElementById('alumno-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit-alumno-id').value;
-            const data = {
-                nombre: document.getElementById('nombre-alumno').value,
-                curp: document.getElementById('curp-alumno').value,
-                tel: document.getElementById('tel-alumno').value
-            };
-            if(id) await updateDoc(doc(db, "alumnos", id), data);
-            else await addDoc(alumColl, { ...data, pendientes: [] });
-            cancelarEdicionAlumno();
-        };
-
-        window.prepararEditarAlumno = (id) => {
-            const a = alumnos.find(x => x.id === id);
-            if(!a) return;
-            document.getElementById('edit-alumno-id').value = a.id;
-            document.getElementById('nombre-alumno').value = a.nombre;
-            document.getElementById('curp-alumno').value = a.curp || '';
-            document.getElementById('tel-alumno').value = a.tel || '';
-            document.getElementById('btn-submit-alumno').innerText = 'Actualizar';
-            document.getElementById('btn-cancel-alumno').classList.remove('hidden');
-        };
-
-        window.cancelarEdicionAlumno = () => {
-            document.getElementById('alumno-form').reset();
-            document.getElementById('edit-alumno-id').value = '';
-            document.getElementById('btn-submit-alumno').innerText = 'Guardar Alumno';
-            document.getElementById('btn-cancel-alumno').classList.add('hidden');
-        };
 
         function renderAlumnos() {
             const ui = document.getElementById('ui-alumnos');
-            document.getElementById('count-alumnos').innerText = alumnos.length;
             ui.innerHTML = alumnos.map(a => `
-                <div class="group bg-slate-50 p-3 rounded-2xl hover:bg-white border border-transparent hover:border-indigo-100 transition-all flex justify-between items-center cursor-pointer" onclick="verHistorial('${a.id}')">
-                    <div class="flex-1">
-                        <span class="font-bold text-slate-700 text-xs">${a.nombre}</span>
-                        <div class="text-[8px] text-slate-400 font-bold uppercase">${a.curp || 'S/C'} | ${a.tel || 'S/T'}</div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center" onclick="verHistorial('${a.id}')">
+                    <div>
+                        <p class="font-black text-indigo-950 text-sm">${a.nombre}</p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase">${a.tel || 'Sin Contacto'}</p>
                     </div>
-                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="event.stopPropagation(); prepararEditarAlumno('${a.id}')" class="text-indigo-400">✎</button>
-                        <button onclick="event.stopPropagation(); eliminarFila('${a.id}', 'alumnos')" class="text-rose-300 hover:text-rose-600 font-bold">×</button>
-                    </div>
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2"/></svg>
                 </div>
             `).join('');
         }
-
-        // --- LÓGICA DIPLOMADOS ---
-        document.getElementById('curso-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit-curso-id').value;
-            const data = {
-                nombre: document.getElementById('nombre-curso').value,
-                sesiones: parseInt(document.getElementById('sesiones-totales').value) || 1
-            };
-            if(id) await updateDoc(doc(db, "cursos", id), data);
-            else await addDoc(cursoColl, data);
-            cancelarEdicionCurso();
-        };
-
-        window.prepararEditarCurso = (id) => {
-            const c = cursos.find(x => x.id === id);
-            if(!c) return;
-            document.getElementById('edit-curso-id').value = c.id;
-            document.getElementById('nombre-curso').value = c.nombre;
-            document.getElementById('sesiones-totales').value = c.sesiones;
-            document.getElementById('btn-submit-curso').innerText = 'Actualizar';
-            document.getElementById('btn-cancel-curso').classList.remove('hidden');
-        };
-
-        window.cancelarEdicionCurso = () => {
-            document.getElementById('curso-form').reset();
-            document.getElementById('edit-curso-id').value = '';
-            document.getElementById('btn-submit-curso').innerText = 'Guardar Diplomado';
-            document.getElementById('btn-cancel-curso').classList.add('hidden');
-        };
-
-        function renderCursos() {
-            document.getElementById('count-cursos').innerText = cursos.length;
-            document.getElementById('ui-cursos').innerHTML = cursos.map(c => `
-                <div class="group flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-100">
-                    <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-emerald-800 uppercase">${c.nombre}</span>
-                        <span class="text-[8px] font-bold text-emerald-600 uppercase italic">${c.sesiones} sesiones</span>
-                    </div>
-                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <button onclick="prepararEditarCurso('${c.id}')">✎</button>
-                        <button onclick="eliminarFila('${c.id}', 'cursos')" class="text-rose-300 hover:text-rose-600 px-2 font-bold text-lg">×</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function populateSelectors() {
-            const selAlum = document.getElementById('select-alumno');
-            const selCur = document.getElementById('select-curso');
-            selAlum.innerHTML = alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
-            selCur.innerHTML = cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
-        }
-
-        window.verHistorial = (id) => {
-            const a = alumnos.find(x => x.id === id);
-            if(!a) return;
-            document.getElementById('modal-titulo-alumno').innerText = a.nombre;
-            document.getElementById('modal-subtitulo-alumno').innerText = `${a.tel || 'S/T'} | ${a.curp || 'S/C'}`;
-            const pagos = transacciones.filter(t => t.alumnoRel === a.nombre);
-            renderProgreso(pagos);
-            renderListaPagos(pagos);
-            document.getElementById('modal-historial').classList.remove('hidden');
-        };
-
-        function renderProgreso(pagos) {
-            const wrap = document.getElementById('modal-progreso-wrapper');
-            if(pagos.length > 0 && pagos[0].cursoRel) {
-                const c = cursos.find(x => x.nombre === pagos[0].cursoRel);
-                if(c) {
-                    const maxS = Math.max(...pagos.map(p => p.sesionNum || 0), 0);
-                    const perc = Math.min(100, (maxS / c.sesiones) * 100);
-                    wrap.classList.remove('hidden');
-                    document.getElementById('modal-label-progreso').innerText = `Diplomado: ${c.nombre}`;
-                    document.getElementById('modal-sesiones-restantes').innerText = (c.sesiones - maxS) > 0 ? `Faltan ${c.sesiones - maxS} sesiones` : "Completado";
-                    document.getElementById('modal-barra-progreso').style.width = `${perc}%`;
-                    return;
-                }
-            }
-            wrap.classList.add('hidden');
-        }
-
-        function renderListaPagos(pagos) {
-            const ui = document.getElementById('modal-lista-pagos');
-            let t = 0;
-            ui.innerHTML = pagos.map(p => {
-                t += p.monto;
-                return `
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex justify-between">
-                        <div>
-                            <div class="text-[10px] font-bold text-slate-800 uppercase">${p.descripcion.replace('[PAGO] ', '')}</div>
-                            <div class="text-[8px] text-slate-400 font-bold">${p.fecha}</div>
-                        </div>
-                        <div class="font-bold text-emerald-600 text-xs">$${p.monto.toLocaleString()}</div>
-                    </div>
-                `;
-            }).join('') || '<p class="text-center text-slate-400 text-[10px] py-4 uppercase font-bold tracking-widest">Sin pagos</p>';
-            document.getElementById('modal-total-alumno').innerText = `$${t.toLocaleString()}`;
-        }
-
-        window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
-
-        // --- UTILIDADES ---
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('fecha').value = hoy;
-        document.getElementById('filtro-fecha').value = hoy;
-        document.getElementById('filtro-fecha').onchange = () => renderFinanzas();
-
-        window.eliminarFila = async (id, coll) => {
-            if(confirm('¿Deseas eliminar este registro de forma permanente?')) await deleteDoc(doc(db, coll, id));
-        };
 
         window.switchTab = (tab) => {
             const isF = tab === 'finanzas';
             document.getElementById('sec-finanzas').classList.toggle('hidden', !isF);
             document.getElementById('sec-alumnos').classList.toggle('hidden', isF);
-            document.getElementById('btn-finanzas').className = isF ? 'flex-1 py-4 text-xs font-black uppercase tracking-widest tab-active' : 'flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400';
-            document.getElementById('btn-alumnos').className = !isF ? 'flex-1 py-4 text-xs font-black uppercase tracking-widest tab-active' : 'flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400';
+            document.getElementById('btn-finanzas').className = isF ? 'flex-1 py-3 text-[10px] font-black uppercase tracking-widest tab-active' : 'flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400';
+            document.getElementById('btn-alumnos').className = !isF ? 'flex-1 py-3 text-[10px] font-black uppercase tracking-widest tab-active' : 'flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400';
         };
 
         window.checkCategoryFields = () => {
@@ -538,14 +328,69 @@
             document.getElementById('wrapper-taller-extra').classList.toggle('hidden', v !== 'ingreso-taller');
         };
 
-        window.exportarCSV = () => {
-            let csv = "\uFEFFFecha,Descripción,Categoría,Monto\n";
-            transacciones.forEach(t => csv += `${t.fecha},"${t.descripcion}",${t.categoria},${t.monto}\n`);
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
-            link.download = `Reporte_Finanzas.csv`;
-            link.click();
+        window.verHistorial = (id) => {
+            const a = alumnos.find(x => x.id === id);
+            if(!a) return;
+            document.getElementById('modal-titulo-alumno').innerText = a.nombre;
+            const pagos = transacciones.filter(t => t.alumnoRel === a.nombre);
+            let total = 0;
+            document.getElementById('modal-lista-pagos').innerHTML = pagos.map(p => {
+                total += p.monto;
+                return `<div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center">
+                            <div><p class="text-[10px] font-black uppercase text-slate-700">${p.descripcion.replace('[PAGO] ', '')}</p>
+                            <p class="text-[8px] font-bold text-slate-400 uppercase">${p.fecha}</p></div>
+                            <p class="font-black text-indigo-600">$${p.monto.toLocaleString()}</p></div>`;
+            }).join('') || '<p class="text-center text-slate-400 text-xs py-10">Sin historial de pagos</p>';
+            document.getElementById('modal-total-alumno').innerText = `$${total.toLocaleString()}`;
+            document.getElementById('modal-historial').classList.remove('hidden');
         };
+
+        window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
+
+        document.getElementById('finance-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const cat = document.getElementById('categoria').value;
+            const monto = parseFloat(document.getElementById('monto').value);
+            const fecha = document.getElementById('fecha').value;
+            const nota = document.getElementById('descripcion').value;
+            let data = { fecha, categoria: cat, tipo: cat.startsWith('ingreso') ? 'ingreso' : 'egreso', monto, timestamp: Date.now() };
+
+            if(cat === 'ingreso-clase') {
+                const al = document.getElementById('select-alumno').value;
+                const cu = document.getElementById('select-curso').value;
+                data.alumnoRel = al;
+                data.descripcion = `[PAGO] ${al} - ${cu}`;
+            } else if(cat === 'ingreso-taller') {
+                data.descripcion = `[TALLER] ${document.getElementById('taller-evento-nombre').value}`;
+            } else {
+                data.descripcion = nota || cat;
+            }
+
+            await addDoc(transColl, data);
+            document.getElementById('monto').value = '';
+        };
+
+        document.getElementById('alumno-form').onsubmit = async (e) => {
+            e.preventDefault();
+            await addDoc(alumColl, {
+                nombre: document.getElementById('nombre-alumno').value,
+                curp: document.getElementById('curp-alumno').value,
+                tel: document.getElementById('tel-alumno').value
+            });
+            document.getElementById('alumno-form').reset();
+            alert('Alumno registrado en SullyBec');
+        };
+
+        function populateSelectors() {
+            document.getElementById('select-alumno').innerHTML = alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
+            document.getElementById('select-curso').innerHTML = ["Diplomado Terapias", "Curso Masaje", "Taller Cuencos"].map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha').value = hoy;
+        document.getElementById('filtro-fecha').value = hoy;
+        document.getElementById('filtro-fecha').onchange = renderFinanzas;
+        checkCategoryFields();
     </script>
 </body>
 </html>
