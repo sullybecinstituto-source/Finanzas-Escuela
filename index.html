@@ -57,6 +57,7 @@
                         <select id="categoria" onchange="checkAlumnoField()" class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-medium">
                             <optgroup label="Ingresos">
                                 <option value="ingreso-clase">Pago Alumno (Clase)</option>
+                                <option value="ingreso-taller">Pago Taller (Única vez)</option>
                                 <option value="ingreso-paciente">Atención Paciente</option>
                                 <option value="ingreso-renta-consultorio">Renta Consultorio</option>
                                 <option value="ingreso-otro">Otro Ingreso</option>
@@ -95,6 +96,20 @@
                         <div class="md:col-span-1">
                             <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase">Nota Corta (Mes/Clase)</label>
                             <input type="text" id="mes-pagado" placeholder="Ej: Marzo / Clase 1 de 4" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 font-bold">
+                        </div>
+                    </div>
+
+                    <!-- Campo para Alumnos Temporales (Talleres) -->
+                    <div id="wrapper-taller-extra" class="md:col-span-4 hidden bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-600 mb-1 uppercase">Nombre del Alumno (Temporal)</label>
+                                <input type="text" id="taller-alumno-nombre" placeholder="Nombre de quien asiste" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-600 mb-1 uppercase">Nombre del Taller / Evento</label>
+                                <input type="text" id="taller-evento-nombre" placeholder="Ej: Taller de Chakras" class="w-full bg-white border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 font-bold">
+                            </div>
                         </div>
                     </div>
 
@@ -253,18 +268,22 @@
                 
                 data.alumnoRel = alum; 
                 data.descripcion = `[${alum}] CURSO: ${curs} | CLASE: ${fClase || 'VARIAS'} | ${mes ? mes + ' | ' : ''}${nota}`.trim();
+            } else if (cat === 'ingreso-taller') {
+                const alumTemp = document.getElementById('taller-alumno-nombre').value;
+                const tallerNom = document.getElementById('taller-evento-nombre').value;
+                data.descripcion = `TALLER: ${tallerNom} | ALUMNO: ${alumTemp} | ${nota}`.trim();
             }
 
             await addDoc(transColl, data);
             
-            // --- MEJORA: LIMPIEZA INTELIGENTE ---
-            // Solo limpiamos monto y notas, mantenemos alumno y diplomado para capturas múltiples rápidas
+            // --- LIMPIEZA INTELIGENTE ---
             document.getElementById('monto').value = '';
             document.getElementById('descripcion').value = '';
             document.getElementById('fecha-clase-especifica').value = '';
             document.getElementById('mes-pagado').value = '';
+            document.getElementById('taller-alumno-nombre').value = '';
             
-            // Mantenemos el foco en el monto para la siguiente clase
+            // Mantenemos el foco en el monto
             document.getElementById('monto').focus();
         };
 
@@ -399,8 +418,12 @@
         };
 
         window.checkAlumnoField = () => {
-            const isClase = document.getElementById('categoria').value === 'ingreso-clase';
+            const cat = document.getElementById('categoria').value;
+            const isClase = cat === 'ingreso-clase';
+            const isTaller = cat === 'ingreso-taller';
+            
             document.getElementById('wrapper-alumno-extra').classList.toggle('hidden', !isClase);
+            document.getElementById('wrapper-taller-extra').classList.toggle('hidden', !isTaller);
         };
         checkAlumnoField();
 
