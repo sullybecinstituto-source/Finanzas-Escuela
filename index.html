@@ -149,7 +149,19 @@
                         <input type="number" id="duracion-curso" placeholder="Sesiones" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                         <input type="number" id="costo-clase" placeholder="Costo Sesión $" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                     </div>
-                    <div class="flex gap-2">
+
+                    <!-- NUEVO: CAMPO DE FECHAS SIN CLASE -->
+                    <div class="bg-slate-50 p-3 rounded-xl">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">Fechas sin clase (Vacaciones/Feriados)</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="date" id="fecha-sin-clase" class="flex-1 bg-white border-none rounded-lg p-2 text-xs font-bold">
+                            <button type="button" onclick="agregarFechaSinClase()" class="bg-rose-500 text-white px-4 rounded-lg text-[9px] font-black uppercase">Añadir</button>
+                        </div>
+                        <div id="lista-fechas-inactivas" class="flex flex-wrap gap-1"></div>
+                        <input type="hidden" id="fechas-inactivas-json" value="[]">
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
                         <button type="submit" id="btn-submit-curso" class="flex-1 bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase">Guardar Curso</button>
                         <button type="button" id="btn-cancelar-curso" onclick="cancelarEdicionCurso()" class="hidden bg-slate-200 text-slate-500 py-4 px-6 rounded-xl font-black text-xs uppercase">Cancelar</button>
                     </div>
@@ -202,6 +214,7 @@
             cursos = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderCursos();
             populateSelects();
+            renderAlumnos(); // Re-render alumnos when courses (and dates) change
         });
 
         function renderFinanzas() {
@@ -231,15 +244,30 @@
 
         window.renderAlumnos = () => {
             const ui = document.getElementById('ui-alumnos');
+            if(!ui) return;
             const hoy = new Date();
             ui.innerHTML = alumnos.map(a => {
                 const pagadas = transacciones.filter(t => t.alumno === a.nombre && t.categoria === 'ingreso-clase').length;
+                const cursoRelacionado = cursos.find(c => c.nombre === a.curso);
                 
-                // LÓGICA DE ESTADO (CORRIENTE O DEBE)
                 let estadoHTML = '';
                 if(a.fechaInicio){
                     const fInicio = new Date(a.fechaInicio + "T00:00:00");
-                    const diffSemanas = Math.floor((hoy - fInicio) / (1000 * 60 * 60 * 24 * 7)) + 1;
+                    
+                    // LÓGICA DE CÁLCULO DE SEMANAS DESCONTANDO FECHAS SIN CLASE
+                    let diffSemanas = Math.floor((hoy - fInicio) / (1000 * 60 * 60 * 24 * 7)) + 1;
+                    
+                    if(cursoRelacionado && cursoRelacionado.fechasInactivas) {
+                        const inactv = JSON.parse(cursoRelacionado.fechasInactivas);
+                        inactv.forEach(fechaStr => {
+                            const fInac = new Date(fechaStr + "T00:00:00");
+                            // Si la fecha inactiva está entre el inicio del alumno y hoy, descontamos una semana
+                            if(fInac >= fInicio && fInac <= hoy) {
+                                diffSemanas--;
+                            }
+                        });
+                    }
+
                     const debe = diffSemanas - pagadas;
                     
                     if(debe <= 0) {
@@ -279,6 +307,8 @@
                     <div class="cursor-pointer flex-1" onclick="prepararEdicionCurso('${c.id}')">
                         <p class="font-black text-sm text-slate-800 uppercase">${c.nombre}</p>
                         <p class="text-[9px] font-bold text-slate-400 uppercase">${c.duracion} Sesiones • $${c.costo}</p>
+                        ${c.fechasInactivas && JSON.parse(c.fechasInactivas).length > 0 ? 
+                            `<p class="text-[7px] text-rose-400 font-bold uppercase mt-1">${JSON.parse(c.fechasInactivas).length} fechas sin clase registradas</p>` : ''}
                     </div>
                     <button onclick="eliminarDoc('cursos', '${c.id}')" class="text-rose-300 text-[8px] font-bold uppercase">Borrar</button>
                 </div>
@@ -287,9 +317,41 @@
 
         function populateSelects() {
             const sA = document.getElementById('select-alumno');
-            sA.innerHTML = '<option value="">Selecciona Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
+            if(sA) sA.innerHTML = '<option value="">Selecciona Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
             const sC = document.getElementById('select-curso-alumno');
-            sC.innerHTML = '<option value="">Selecciona Curso...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+            if(sC) sC.innerHTML = '<option value="">Selecciona Curso...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+        }
+
+        // --- LÓGICA DE FECHAS SIN CLASE ---
+        window.agregarFechaSinClase = () => {
+            const fInput = document.getElementById('fecha-sin-clase');
+            const listaJson = document.getElementById('fechas-inactivas-json');
+            if(!fInput.value) return;
+
+            let fechas = JSON.parse(listaJson.value || "[]");
+            if(!fechas.includes(fInput.value)) {
+                fechas.push(fInput.value);
+                listaJson.value = JSON.stringify(fechas);
+                actualizarListaVisualInactivas(fechas);
+            }
+            fInput.value = "";
+        };
+
+        window.quitarFechaSinClase = (f) => {
+            const listaJson = document.getElementById('fechas-inactivas-json');
+            let fechas = JSON.parse(listaJson.value || "[]");
+            fechas = fechas.filter(x => x !== f);
+            listaJson.value = JSON.stringify(fechas);
+            actualizarListaVisualInactivas(fechas);
+        };
+
+        function actualizarListaVisualInactivas(fechas) {
+            const container = document.getElementById('lista-fechas-inactivas');
+            container.innerHTML = fechas.map(f => `
+                <div class="bg-rose-100 text-rose-600 px-2 py-1 rounded-lg text-[8px] font-black flex items-center gap-1">
+                    ${f} <span onclick="quitarFechaSinClase('${f}')" class="text-[10px] cursor-pointer">×</span>
+                </div>
+            `).join('');
         }
 
         // EDICIÓN ALUMNOS
@@ -324,6 +386,11 @@
             document.getElementById('nombre-curso').value = c.nombre;
             document.getElementById('duracion-curso').value = c.duracion;
             document.getElementById('costo-clase').value = c.costo;
+            
+            const fechas = c.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
+            document.getElementById('fechas-inactivas-json').value = JSON.stringify(fechas);
+            actualizarListaVisualInactivas(fechas);
+
             document.getElementById('form-curso-title').innerText = "Editando Diplomado: " + c.nombre;
             document.getElementById('btn-submit-curso').innerText = "Actualizar";
             document.getElementById('btn-cancelar-curso').classList.remove('hidden');
@@ -332,6 +399,8 @@
         window.cancelarEdicionCurso = () => {
             document.getElementById('curso-form').reset();
             document.getElementById('edit-id-curso').value = "";
+            document.getElementById('fechas-inactivas-json').value = "[]";
+            document.getElementById('lista-fechas-inactivas').innerHTML = "";
             document.getElementById('form-curso-title').innerText = "Nuevo Diplomado";
             document.getElementById('btn-submit-curso').innerText = "Guardar Curso";
             document.getElementById('btn-cancelar-curso').classList.add('hidden');
@@ -357,7 +426,8 @@
             const data = {
                 nombre: document.getElementById('nombre-curso').value,
                 duracion: document.getElementById('duracion-curso').value,
-                costo: document.getElementById('costo-clase').value
+                costo: document.getElementById('costo-clase').value,
+                fechasInactivas: document.getElementById('fechas-inactivas-json').value
             };
             id ? await updateDoc(doc(db, "cursos", id), data) : await addDoc(collection(db, "cursos"), data);
             cancelarEdicionCurso();
