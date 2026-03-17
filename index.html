@@ -76,7 +76,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nuevo Movimiento</h3>
                     <div class="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100">
-                        <span class="text-[8px] font-black text-rose-600 uppercase">Carga de Historial (No suma $)</span>
+                        <span class="text-[8px] font-black text-rose-600 uppercase">Carga de Historial</span>
                         <label class="switch"><input type="checkbox" id="solo-historial"><span class="slider"></span></label>
                     </div>
                 </div>
@@ -100,19 +100,27 @@
                         <select id="select-alumno" onchange="autoSugerirSesionYFecha()" class="w-full bg-white border-none rounded-lg p-3 text-sm font-bold shadow-sm text-indigo-900"></select>
                         <div class="grid grid-cols-2 gap-3">
                             <div><label class="block text-[9px] font-bold text-indigo-400 mb-1 uppercase">Sesión N°</label><input type="number" id="num-sesion" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold shadow-sm"></div>
-                            <div><label class="block text-[9px] font-bold text-indigo-400 mb-1 uppercase">Fecha de Clase</label><input type="date" id="fecha-clase-corresponde" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold shadow-sm"></div>
+                            <div><label class="block text-[9px] font-bold text-indigo-400 mb-1 uppercase">Fecha que se paga</label><input type="date" id="fecha-clase-corresponde" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold shadow-sm"></div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="date" id="fecha-pago-real" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
-                        <input type="number" id="monto" placeholder="Monto $" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Fecha del Recibo</label>
+                            <input type="date" id="fecha-pago-real" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Monto $</label>
+                            <input type="number" id="monto" placeholder="0.00" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
+                        </div>
                     </div>
 
-                    <input type="text" id="descripcion" placeholder="Notas..." class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm">
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-xs">Registrar Ahora</button>
+                    <input type="text" id="descripcion" placeholder="Notas adicionales..." class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm">
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-xs">Registrar Movimiento</button>
                 </form>
             </div>
+            
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Movimientos Recientes</h3>
             <div id="lista-transacciones" class="space-y-2"></div>
         </section>
 
@@ -173,10 +181,10 @@
     <!-- History Modal -->
     <div id="modal-historial" class="fixed inset-0 bg-white z-[100] hidden flex flex-col">
         <div class="p-6 bg-indigo-900 text-white flex justify-between items-center">
-            <h2 id="modal-nombre" class="text-xl font-black uppercase">Historial</h2>
+            <h2 id="modal-nombre" class="text-xl font-black uppercase tracking-tight">Historial</h2>
             <button onclick="cerrarModal()" class="bg-white/20 px-4 py-2 rounded-xl text-xs font-bold uppercase">Cerrar</button>
         </div>
-        <div id="modal-content" class="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-50"></div>
+        <div id="modal-content" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50"></div>
     </div>
 
     <script type="module">
@@ -224,12 +232,20 @@
                 if(!t.soloHistorial) { t.tipo === 'ingreso' ? i += t.monto : e += t.monto; }
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm";
+                
+                // Mostrar fecha de clase si existe
+                const subtext = t.fechaClase ? 
+                    `<span class="text-indigo-500 font-black">CLASE DEL: ${t.fechaClase}</span>` : 
+                    `FECHA: ${t.fechaPago}`;
+
                 card.innerHTML = `
-                    <div>
-                        <p class="text-[10px] font-black text-slate-800 uppercase">${t.descripcion}</p>
-                        <p class="text-[8px] font-bold text-slate-400 uppercase">${t.fechaPago}</p>
+                    <div class="flex-1">
+                        <p class="text-[10px] font-black text-slate-800 uppercase leading-tight">${t.descripcion}</p>
+                        <p class="text-[8px] font-bold text-slate-400 uppercase mt-1">
+                            RECIBO: ${t.fechaPago} • ${subtext}
+                        </p>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right ml-4">
                         <p class="font-black text-sm ${t.tipo === 'ingreso' ? 'text-emerald-500' : 'text-rose-500'} ${t.soloHistorial ? 'opacity-30' : ''}">$${t.monto}</p>
                         <button onclick="eliminarDoc('transacciones', '${t.id}')" class="text-[8px] font-bold text-slate-300 uppercase">Borrar</button>
                     </div>
@@ -317,7 +333,6 @@
             if(sC) sC.innerHTML = '<option value="">Selecciona Curso...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
         }
 
-        // --- INACTIVE DATES LOGIC ---
         window.agregarFechaSinClase = () => {
             const fInput = document.getElementById('fecha-sin-clase');
             const listaJson = document.getElementById('fechas-inactivas-json');
@@ -349,7 +364,6 @@
             `).join('');
         }
 
-        // --- SMART DATE SUGGESTION ---
         window.autoSugerirSesionYFecha = () => {
             const nombre = document.getElementById('select-alumno').value;
             const a = alumnos.find(x => x.nombre === nombre);
@@ -365,11 +379,9 @@
                 let fechaBase = new Date(a.fechaInicio + "T00:00:00");
                 let fechasInactivas = c?.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
                 
-                // Calculamos la fecha tentativa sumando semanas
                 let clasesPorSaltar = pagadas;
                 let fechaSugerida = new Date(fechaBase);
 
-                // Lógica iterativa para encontrar la fecha correcta saltando asuetos
                 let clasesContadas = 0;
                 while (clasesContadas < clasesPorSaltar) {
                     fechaSugerida.setDate(fechaSugerida.getDate() + 7);
@@ -379,7 +391,6 @@
                     }
                 }
 
-                // Finalmente, si la fecha resultante cae en un asueto, saltar a la siguiente semana disponible
                 while (fechasInactivas.includes(fechaSugerida.toISOString().split('T')[0])) {
                     fechaSugerida.setDate(fechaSugerida.getDate() + 7);
                 }
@@ -388,7 +399,6 @@
             }
         };
 
-        // EDITING STUDENTS
         window.prepararEdicionAlum = (id) => {
             const a = alumnos.find(x => x.id === id);
             if(!a) return;
@@ -412,7 +422,6 @@
             document.getElementById('btn-cancelar-edit').classList.add('hidden');
         };
 
-        // EDITING COURSES
         window.prepararEdicionCurso = (id) => {
             const c = cursos.find(x => x.id === id);
             if(!c) return;
@@ -482,7 +491,7 @@
                 data.alumno = document.getElementById('select-alumno').value;
                 data.numSesion = document.getElementById('num-sesion').value;
                 data.fechaClase = document.getElementById('fecha-clase-corresponde').value;
-                data.descripcion = `SESIÓN ${data.numSesion}: ${data.alumno}`;
+                data.descripcion = `PAGO SESIÓN ${data.numSesion}: ${data.alumno}`;
             } else {
                 data.descripcion = document.getElementById('descripcion').value || cat.toUpperCase();
             }
@@ -499,17 +508,30 @@
         };
         window.toggleFields = () => document.getElementById('fields-alumno').classList.toggle('hidden', document.getElementById('categoria').value !== 'ingreso-clase');
         window.eliminarDoc = async (c, id) => { if(confirm("¿Seguro?")) await deleteDoc(doc(db, c, id)); };
+        
         window.verHistorial = (n) => {
             const p = transacciones.filter(t => t.alumno === n);
             document.getElementById('modal-nombre').innerText = n;
             document.getElementById('modal-content').innerHTML = p.map(x => `
-                <div class="bg-white p-3 rounded-xl border border-slate-200 flex justify-between">
-                    <div><p class="text-[10px] font-black uppercase">${x.categoria === 'ingreso-clase' ? 'SESIÓN '+x.numSesion : x.descripcion}</p><p class="text-[8px] text-slate-400">${x.fechaPago}</p></div>
-                    <p class="font-black text-sm">$${x.monto}</p>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-between shadow-sm">
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-indigo-900 leading-tight">
+                            ${x.categoria === 'ingreso-clase' ? 'SESIÓN ' + x.numSesion : x.descripcion}
+                        </p>
+                        <p class="text-[8px] text-slate-400 font-bold mt-1">
+                            COBRADO: ${x.fechaPago}
+                        </p>
+                        ${x.fechaClase ? `<p class="text-[8px] text-indigo-500 font-black">PARA LA CLASE DE: ${x.fechaClase}</p>` : ''}
+                    </div>
+                    <div class="text-right">
+                        <p class="font-black text-sm text-slate-800">$${x.monto}</p>
+                        ${x.soloHistorial ? '<p class="text-[7px] text-rose-400 font-black uppercase">Solo Historial</p>' : ''}
+                    </div>
                 </div>
-            `).join('') || '<p class="text-center text-slate-400 py-10">Sin historial</p>';
+            `).join('') || '<p class="text-center text-slate-400 py-10">Sin historial registrado aún.</p>';
             document.getElementById('modal-historial').classList.remove('hidden');
         };
+
         window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
         const resetFechas = () => {
             const h = new Date().toISOString().split('T')[0];
