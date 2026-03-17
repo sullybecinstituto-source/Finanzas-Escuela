@@ -77,7 +77,7 @@
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nuevo Movimiento</h3>
                     <div class="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100">
                         <span class="text-[8px] font-black text-rose-600 uppercase">Carga de Historial</span>
-                        <label class="switch"><input type="checkbox" id="solo-historial"><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="solo-historial" checked><span class="slider"></span></label>
                     </div>
                 </div>
 
@@ -219,12 +219,12 @@
         const db = getFirestore(app);
         
         let transacciones = [], alumnos = [], cursos = [];
+        let ultimoAlumnoSeleccionado = "";
 
         onSnapshot(query(collection(db, "transacciones"), orderBy("timestamp", "desc")), (snap) => {
             transacciones = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderFinanzas();
             renderAlumnos(); 
-            // Si el modal está abierto, refrescar contenido
             if(!document.getElementById('modal-historial').classList.contains('hidden')) {
                 const nombreActual = document.getElementById('modal-nombre').innerText;
                 verHistorial(nombreActual);
@@ -380,7 +380,12 @@
 
         function populateSelects() {
             const sA = document.getElementById('select-alumno');
-            if(sA) sA.innerHTML = '<option value="">Selecciona Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
+            if(sA) {
+                sA.innerHTML = '<option value="">Selecciona Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
+                if(ultimoAlumnoSeleccionado) {
+                    sA.value = ultimoAlumnoSeleccionado;
+                }
+            }
             const sC = document.getElementById('select-curso-alumno');
             if(sC) sC.innerHTML = '<option value="">Selecciona Curso...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
         }
@@ -429,11 +434,13 @@
 
         window.autoSugerirSesionYFecha = () => {
             const nombre = document.getElementById('select-alumno').value;
+            ultimoAlumnoSeleccionado = nombre;
             const a = alumnos.find(x => x.nombre === nombre);
             if (!a) return;
             
             const c = cursos.find(x => x.nombre === a.curso);
-            const pagadas = transacciones.filter(t => t.alumno === nombre && t.categoria === 'ingreso-clase').length;
+            const transAlum = transacciones.filter(t => t.alumno === nombre && t.categoria === 'ingreso-clase');
+            const pagadas = transAlum.length;
             
             document.getElementById('num-sesion').value = pagadas + 1;
             document.getElementById('monto').value = c ? c.costo : 0;
@@ -556,25 +563,36 @@
         document.getElementById('finance-form').onsubmit = async (e) => {
             e.preventDefault();
             const cat = document.getElementById('categoria').value;
+            const soloHist = document.getElementById('solo-historial').checked;
             const data = {
                 categoria: cat,
                 tipo: cat.startsWith('ingreso') ? 'ingreso' : 'egreso',
                 monto: parseFloat(document.getElementById('monto').value),
                 fechaPago: document.getElementById('fecha-pago-real').value,
                 timestamp: Date.now(),
-                soloHistorial: document.getElementById('solo-historial').checked
+                soloHistorial: soloHist
             };
+            
             if(cat === 'ingreso-clase') {
                 data.alumno = document.getElementById('select-alumno').value;
                 data.numSesion = document.getElementById('num-sesion').value;
                 data.fechaClase = document.getElementById('fecha-clase-corresponde').value;
                 data.descripcion = `PAGO SESIÓN ${data.numSesion}: ${data.alumno}`;
+                
+                ultimoAlumnoSeleccionado = data.alumno;
             } else {
                 data.descripcion = document.getElementById('descripcion').value || cat.toUpperCase();
             }
+            
             await addDoc(collection(db, "transacciones"), data);
-            document.getElementById('finance-form').reset();
-            resetFechas();
+            
+            if (cat === 'ingreso-clase') {
+                // Pre-cargar para el siguiente registro del mismo alumno
+                autoSugerirSesionYFecha();
+            } else {
+                document.getElementById('finance-form').reset();
+                resetFechas();
+            }
         };
 
         window.switchTab = (t) => {
