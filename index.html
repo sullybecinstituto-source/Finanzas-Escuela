@@ -193,7 +193,10 @@
     <!-- History Modal -->
     <div id="modal-historial" class="fixed inset-0 bg-white z-[100] hidden flex flex-col">
         <div class="p-6 bg-indigo-900 text-white flex justify-between items-center">
-            <h2 id="modal-nombre" class="text-xl font-black uppercase tracking-tight">Historial</h2>
+            <div>
+                <h2 id="modal-nombre" class="text-xl font-black uppercase tracking-tight">Historial</h2>
+                <p class="text-[9px] opacity-70 font-bold uppercase tracking-widest mt-1">Gestión de Cobros Pasados</p>
+            </div>
             <button onclick="cerrarModal()" class="bg-white/20 px-4 py-2 rounded-xl text-xs font-bold uppercase">Cerrar</button>
         </div>
         <div id="modal-content" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50"></div>
@@ -221,6 +224,11 @@
             transacciones = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderFinanzas();
             renderAlumnos(); 
+            // Si el modal está abierto, refrescar contenido
+            if(!document.getElementById('modal-historial').classList.contains('hidden')) {
+                const nombreActual = document.getElementById('modal-nombre').innerText;
+                verHistorial(nombreActual);
+            }
         });
 
         onSnapshot(query(collection(db, "alumnos"), orderBy("nombre", "asc")), (snap) => {
@@ -251,7 +259,10 @@
 
                 card.innerHTML = `
                     <div class="flex-1">
-                        <p class="text-[10px] font-black text-slate-800 uppercase leading-tight">${t.descripcion}</p>
+                        <div class="flex items-center gap-2">
+                            <p class="text-[10px] font-black text-slate-800 uppercase leading-tight">${t.descripcion}</p>
+                            ${t.soloHistorial ? '<span class="bg-rose-100 text-rose-500 text-[7px] px-1.5 py-0.5 rounded-md font-black uppercase">Historial</span>' : ''}
+                        </div>
                         <p class="text-[8px] font-bold text-slate-400 uppercase mt-1">
                             RECIBO: ${t.fechaPago} • ${subtext}
                         </p>
@@ -383,7 +394,6 @@
                 fechas.push(fInput.value);
                 listaJson.value = JSON.stringify(fechas);
                 actualizarListaVisualInactivas(fechas);
-                // Forzar recalculado de fecha fin
                 const fin = calcularFechaTermino(
                     document.getElementById('fecha-inicio-curso').value,
                     document.getElementById('duracion-curso').value,
@@ -428,7 +438,6 @@
             document.getElementById('num-sesion').value = pagadas + 1;
             document.getElementById('monto').value = c ? c.costo : 0;
 
-            // PRIORIDAD: Si el curso tiene fecha de inicio, usar esa como base para que no se desfase a 2026
             const fechaBaseStr = (a.fechaInicio && a.fechaInicio !== "") ? a.fechaInicio : (c?.fechaInicio || "");
             
             if(fechaBaseStr) {
@@ -453,6 +462,12 @@
 
                 document.getElementById('fecha-clase-corresponde').value = fechaSugerida.toISOString().split('T')[0];
             }
+        };
+
+        window.toggleHistorialPago = async (id, estadoActual) => {
+            await updateDoc(doc(db, "transacciones", id), {
+                soloHistorial: !estadoActual
+            });
         };
 
         window.prepararEdicionAlum = (id) => {
@@ -575,19 +590,25 @@
             const p = transacciones.filter(t => t.alumno === n);
             document.getElementById('modal-nombre').innerText = n;
             document.getElementById('modal-content').innerHTML = p.map(x => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-between shadow-sm">
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-indigo-900 leading-tight">
-                            ${x.categoria === 'ingreso-clase' ? 'SESIÓN ' + x.numSesion : x.descripcion}
-                        </p>
+                <div class="bg-white p-4 rounded-2xl border ${x.soloHistorial ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200'} flex justify-between shadow-sm items-center">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <p class="text-[10px] font-black uppercase text-indigo-900 leading-tight">
+                                ${x.categoria === 'ingreso-clase' ? 'SESIÓN ' + x.numSesion : x.descripcion}
+                            </p>
+                            ${x.soloHistorial ? '<span class="bg-rose-500 text-white text-[6px] px-1.5 py-0.5 rounded font-black">HISTORIAL</span>' : ''}
+                        </div>
                         <p class="text-[8px] text-slate-400 font-bold mt-1">
-                            COBRADO: ${x.fechaPago}
+                            RECIBO: ${x.fechaPago}
                         </p>
-                        ${x.fechaClase ? `<p class="text-[8px] text-indigo-500 font-black">PARA LA CLASE DE: ${x.fechaClase}</p>` : ''}
+                        ${x.fechaClase ? `<p class="text-[8px] text-indigo-500 font-black">PARA: ${x.fechaClase}</p>` : ''}
                     </div>
-                    <div class="text-right">
-                        <p class="font-black text-sm text-slate-800">$${x.monto}</p>
-                        ${x.soloHistorial ? '<p class="text-[7px] text-rose-400 font-black uppercase">Solo Historial</p>' : ''}
+                    <div class="text-right flex flex-col items-end gap-2">
+                        <p class="font-black text-sm ${x.soloHistorial ? 'text-slate-400' : 'text-slate-800'}">$${x.monto}</p>
+                        <button onclick="toggleHistorialPago('${x.id}', ${x.soloHistorial || false})" 
+                                class="text-[7px] font-black uppercase px-2 py-1 rounded-lg border ${x.soloHistorial ? 'bg-indigo-600 text-white border-indigo-600' : 'border-slate-300 text-slate-500'}">
+                            ${x.soloHistorial ? 'Activar en Caja' : 'Pasar a Historial'}
+                        </button>
                     </div>
                 </div>
             `).join('') || '<p class="text-center text-slate-400 py-10">Sin historial registrado aún.</p>';
