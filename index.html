@@ -53,7 +53,7 @@
     </div>
 
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-24">
-        <!-- Saldo -->
+        <!-- Balance View -->
         <div class="balance-card p-6 rounded-[2rem] text-white mb-6 shadow-xl text-center">
             <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest">Saldo en Caja (Real)</p>
             <h2 id="total-balance" class="text-5xl font-black mt-1">$0</h2>
@@ -63,14 +63,14 @@
             </div>
         </div>
 
-        <!-- Navegación -->
+        <!-- Navigation Tabs -->
         <nav class="flex mb-6 bg-white p-1 rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
             <button onclick="switchTab('finanzas')" id="btn-finanzas" class="flex-1 min-w-[100px] py-3 text-[10px] font-black uppercase tab-active whitespace-nowrap">Cobros Rápidos</button>
             <button onclick="switchTab('gestion')" id="btn-gestion" class="flex-1 min-w-[100px] py-3 text-[10px] font-black uppercase text-slate-400 whitespace-nowrap">Alumnos</button>
             <button onclick="switchTab('cursos')" id="btn-cursos" class="flex-1 min-w-[100px] py-3 text-[10px] font-black uppercase text-slate-400 whitespace-nowrap">Cursos</button>
         </nav>
 
-        <!-- SECCIÓN FINANZAS -->
+        <!-- FINANCE SECTION -->
         <section id="sec-finanzas" class="space-y-6">
             <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
@@ -116,7 +116,7 @@
             <div id="lista-transacciones" class="space-y-2"></div>
         </section>
 
-        <!-- SECCIÓN ALUMNOS -->
+        <!-- STUDENTS SECTION -->
         <section id="sec-gestion" class="hidden space-y-6">
             <div id="form-alumno-container" class="bg-white border-2 border-indigo-100 rounded-[2rem] p-6 shadow-sm">
                 <h3 id="form-alumno-title" class="text-[11px] font-black text-indigo-600 uppercase mb-4">Registro / Edición de Alumno</h3>
@@ -138,7 +138,7 @@
             <div id="ui-alumnos" class="grid grid-cols-1 gap-3"></div>
         </section>
 
-        <!-- SECCIÓN CURSOS -->
+        <!-- COURSES SECTION -->
         <section id="sec-cursos" class="hidden space-y-6">
             <div id="form-curso-container" class="bg-white border-2 border-slate-900 rounded-[2rem] p-6 shadow-sm">
                 <h3 id="form-curso-title" class="text-[10px] font-black text-slate-400 uppercase mb-4">Nuevo Diplomado</h3>
@@ -150,7 +150,6 @@
                         <input type="number" id="costo-clase" placeholder="Costo Sesión $" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                     </div>
 
-                    <!-- NUEVO: CAMPO DE FECHAS SIN CLASE -->
                     <div class="bg-slate-50 p-3 rounded-xl">
                         <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">Fechas sin clase (Vacaciones/Feriados)</label>
                         <div class="flex gap-2 mb-2">
@@ -171,7 +170,7 @@
         </section>
     </div>
 
-    <!-- Modal Historial -->
+    <!-- History Modal -->
     <div id="modal-historial" class="fixed inset-0 bg-white z-[100] hidden flex flex-col">
         <div class="p-6 bg-indigo-900 text-white flex justify-between items-center">
             <h2 id="modal-nombre" class="text-xl font-black uppercase">Historial</h2>
@@ -214,7 +213,7 @@
             cursos = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderCursos();
             populateSelects();
-            renderAlumnos(); // Re-render alumnos when courses (and dates) change
+            renderAlumnos();
         });
 
         function renderFinanzas() {
@@ -253,15 +252,12 @@
                 let estadoHTML = '';
                 if(a.fechaInicio){
                     const fInicio = new Date(a.fechaInicio + "T00:00:00");
-                    
-                    // LÓGICA DE CÁLCULO DE SEMANAS DESCONTANDO FECHAS SIN CLASE
                     let diffSemanas = Math.floor((hoy - fInicio) / (1000 * 60 * 60 * 24 * 7)) + 1;
                     
                     if(cursoRelacionado && cursoRelacionado.fechasInactivas) {
                         const inactv = JSON.parse(cursoRelacionado.fechasInactivas);
                         inactv.forEach(fechaStr => {
                             const fInac = new Date(fechaStr + "T00:00:00");
-                            // Si la fecha inactiva está entre el inicio del alumno y hoy, descontamos una semana
                             if(fInac >= fInicio && fInac <= hoy) {
                                 diffSemanas--;
                             }
@@ -269,7 +265,6 @@
                     }
 
                     const debe = diffSemanas - pagadas;
-                    
                     if(debe <= 0) {
                         estadoHTML = `<span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded-md text-[8px] font-black uppercase">Al Corriente</span>`;
                     } else {
@@ -322,7 +317,7 @@
             if(sC) sC.innerHTML = '<option value="">Selecciona Curso...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
         }
 
-        // --- LÓGICA DE FECHAS SIN CLASE ---
+        // --- INACTIVE DATES LOGIC ---
         window.agregarFechaSinClase = () => {
             const fInput = document.getElementById('fecha-sin-clase');
             const listaJson = document.getElementById('fechas-inactivas-json');
@@ -354,7 +349,46 @@
             `).join('');
         }
 
-        // EDICIÓN ALUMNOS
+        // --- SMART DATE SUGGESTION ---
+        window.autoSugerirSesionYFecha = () => {
+            const nombre = document.getElementById('select-alumno').value;
+            const a = alumnos.find(x => x.nombre === nombre);
+            if (!a) return;
+            
+            const c = cursos.find(x => x.nombre === a.curso);
+            const pagadas = transacciones.filter(t => t.alumno === nombre && t.categoria === 'ingreso-clase').length;
+            
+            document.getElementById('num-sesion').value = pagadas + 1;
+            document.getElementById('monto').value = c ? c.costo : 0;
+
+            if(a.fechaInicio) {
+                let fechaBase = new Date(a.fechaInicio + "T00:00:00");
+                let fechasInactivas = c?.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
+                
+                // Calculamos la fecha tentativa sumando semanas
+                let clasesPorSaltar = pagadas;
+                let fechaSugerida = new Date(fechaBase);
+
+                // Lógica iterativa para encontrar la fecha correcta saltando asuetos
+                let clasesContadas = 0;
+                while (clasesContadas < clasesPorSaltar) {
+                    fechaSugerida.setDate(fechaSugerida.getDate() + 7);
+                    let strFecha = fechaSugerida.toISOString().split('T')[0];
+                    if (!fechasInactivas.includes(strFecha)) {
+                        clasesContadas++;
+                    }
+                }
+
+                // Finalmente, si la fecha resultante cae en un asueto, saltar a la siguiente semana disponible
+                while (fechasInactivas.includes(fechaSugerida.toISOString().split('T')[0])) {
+                    fechaSugerida.setDate(fechaSugerida.getDate() + 7);
+                }
+
+                document.getElementById('fecha-clase-corresponde').value = fechaSugerida.toISOString().split('T')[0];
+            }
+        };
+
+        // EDITING STUDENTS
         window.prepararEdicionAlum = (id) => {
             const a = alumnos.find(x => x.id === id);
             if(!a) return;
@@ -378,7 +412,7 @@
             document.getElementById('btn-cancelar-edit').classList.add('hidden');
         };
 
-        // EDICIÓN CURSOS
+        // EDITING COURSES
         window.prepararEdicionCurso = (id) => {
             const c = cursos.find(x => x.id === id);
             if(!c) return;
@@ -431,20 +465,6 @@
             };
             id ? await updateDoc(doc(db, "cursos", id), data) : await addDoc(collection(db, "cursos"), data);
             cancelarEdicionCurso();
-        };
-
-        window.autoSugerirSesionYFecha = () => {
-            const nombre = document.getElementById('select-alumno').value;
-            const a = alumnos.find(x => x.nombre === nombre);
-            const c = cursos.find(x => x.nombre === a?.curso);
-            const pagadas = transacciones.filter(t => t.alumno === nombre && t.categoria === 'ingreso-clase').length;
-            document.getElementById('num-sesion').value = pagadas + 1;
-            document.getElementById('monto').value = c ? c.costo : 0;
-            if(a && a.fechaInicio) {
-                let f = new Date(a.fechaInicio + "T00:00:00");
-                f.setDate(f.getDate() + (pagadas * 7));
-                document.getElementById('fecha-clase-corresponde').value = f.toISOString().split('T')[0];
-            }
         };
 
         document.getElementById('finance-form').onsubmit = async (e) => {
