@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Finanzas - Escuela de Terapias</title>
+    <title>Control de Finanzas - Escuela de Terapias (Nube)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
@@ -21,7 +21,10 @@
         <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Escuela & Consultorio</h1>
-                <p class="text-slate-500 italic">Gestión integral con respaldo de seguridad</p>
+                <div class="flex items-center gap-2 mt-1">
+                    <span id="cloud-status" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <p id="status-text" class="text-xs text-slate-500 font-medium uppercase tracking-wider">Conectando a la nube...</p>
+                </div>
             </div>
             <div id="balance-global" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex gap-6">
                 <div>
@@ -41,7 +44,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Nuevo Registro
+                Nuevo Registro Sincronizado
             </h2>
             <form id="finance-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="md:col-span-1">
@@ -53,7 +56,7 @@
                     <select id="tipo" class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                         <optgroup label="Ingresos">
                             <option value="ingreso-clase">Pago Alumno (Clase)</option>
-                            <option value="ingreso-paciente">Atención Paciente (Propio)</option>
+                            <option value="ingreso-paciente">Atención Paciente</option>
                             <option value="ingreso-renta-consultorio">Renta de Consultorio</option>
                             <option value="ingreso-otro">Otro Ingreso</option>
                         </optgroup>
@@ -71,32 +74,28 @@
                     <input type="number" id="monto" step="0.01" placeholder="0.00" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                 </div>
                 <div class="md:col-span-1 flex items-end">
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-200">
-                        Registrar
+                    <button type="submit" id="submit-btn" disabled class="w-full bg-slate-400 text-white font-semibold py-3 rounded-xl transition-all shadow-lg opacity-50 cursor-not-allowed">
+                        Conectando...
                     </button>
                 </div>
                 <div class="md:col-span-4">
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Descripción Detallada</label>
-                    <input type="text" id="descripcion" placeholder="Ej: Renta consultorio / Pago Luz / Alumno Reiki" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Descripción</label>
+                    <input type="text" id="descripcion" placeholder="Ej: Pago mensual Alumno Juan" required class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500">
                 </div>
             </form>
         </div>
 
-        <!-- Herramientas de Respaldo -->
-        <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
-            <h2 class="text-xl font-bold text-slate-800">Historial</h2>
-            <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-slate-100">
-                <button onclick="exportarCSV()" class="text-[10px] font-bold text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100 uppercase transition-all">
-                    Guardar Excel (Backup)
+        <!-- Herramientas -->
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+            <h2 class="text-xl font-bold text-slate-800 tracking-tight">Historial en Tiempo Real</h2>
+            <div class="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-slate-100 w-full sm:w-auto justify-center">
+                <button onclick="exportarCSV()" class="flex-1 sm:flex-none text-[11px] font-bold text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 uppercase transition-all">
+                    Descargar Excel
                 </button>
-                <label class="text-[10px] font-bold text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 cursor-pointer uppercase transition-all">
-                    Cargar Respaldo
-                    <input type="file" id="importar-csv" accept=".csv" class="hidden" onchange="importarCSV(this)">
-                </label>
             </div>
         </div>
 
-        <!-- Lista -->
+        <!-- Tabla -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-4 border-b border-slate-50 flex items-center justify-between">
                 <div class="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-widest">
@@ -118,139 +117,99 @@
                 </table>
             </div>
             <div id="empty-state" class="p-12 text-center text-slate-400 hidden">
-                <p>No hay registros guardados.</p>
+                <p>No hay registros disponibles en la nube.</p>
             </div>
         </div>
     </div>
 
-    <script>
-        const DB_KEY = 'escuela_terapias_definitiva';
-        
-        function obtenerDatos() {
-            const data = localStorage.getItem(DB_KEY);
-            if (data) {
-                try {
-                    return JSON.parse(data);
-                } catch(e) { return []; }
-            }
-            return [];
-        }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        let transacciones = obtenerDatos();
+        // --- PEGA AQUÍ TUS DATOS DE FIREBASE QUE COPIASTE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyCcAda5-ewiR78bfLyYrjEMhfdc0RFxd7s",
+          authDomain: "finanzas-escuela.firebaseapp.com",
+          projectId: "finanzas-escuela",
+          storageBucket: "finanzas-escuela.firebasestorage.app",
+          messagingSenderId: "106864276061",
+          appId: "1:106864276061:web:cc8b26cca0ef07088f13b4"
+        };
+        // ----------------------------------------
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const financeCollection = collection(db, "transacciones");
+
+        let transacciones = [];
         const form = document.getElementById('finance-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const statusPill = document.getElementById('cloud-status');
+        const statusText = document.getElementById('status-text');
+        const filtroFechaEl = document.getElementById('filtro-fecha');
         const lista = document.getElementById('lista-transacciones');
         const totalIngresosEl = document.getElementById('total-ingresos');
         const totalEgresosEl = document.getElementById('total-egresos');
         const resumenDiaEl = document.getElementById('resumen-dia');
-        const emptyState = document.getElementById('empty-state');
-        const filtroFechaEl = document.getElementById('filtro-fecha');
 
         const hoyStr = new Date().toISOString().split('T')[0];
         document.getElementById('fecha').value = hoyStr;
         filtroFechaEl.value = hoyStr;
 
-        function guardarYActualizar() {
-            localStorage.setItem(DB_KEY, JSON.stringify(transacciones));
+        // Escuchar cambios en la base de datos
+        const q = query(financeCollection, orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            transacciones = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            statusPill.classList.replace('bg-amber-400', 'bg-emerald-500');
+            statusPill.classList.remove('animate-pulse');
+            statusText.innerText = "Conectado a la nube";
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Registrar";
+            submitBtn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 cursor-pointer";
+            
             renderizar();
-        }
+        }, (error) => {
+            console.error("Error:", error);
+            statusPill.classList.replace('bg-amber-400', 'bg-rose-500');
+            statusText.innerText = "Error de conexión: Revisa tus claves";
+        });
 
-        function agregarTransaccion(e) {
+        form.onsubmit = async (e) => {
             e.preventDefault();
             const categoria = document.getElementById('tipo').value;
             const tipoBasico = categoria.startsWith('ingreso') ? 'ingreso' : 'egreso';
 
             const nueva = {
-                id: Date.now(),
                 fecha: document.getElementById('fecha').value,
                 categoria: categoria,
                 tipo: tipoBasico,
                 monto: parseFloat(document.getElementById('monto').value),
-                descripcion: document.getElementById('descripcion').value
+                descripcion: document.getElementById('descripcion').value,
+                timestamp: Date.now()
             };
 
-            transacciones.unshift(nueva);
-            form.reset();
-            document.getElementById('fecha').value = hoyStr;
-            guardarYActualizar();
-        }
-
-        function eliminarTransaccion(id) {
-            if(confirm('¿Eliminar este registro permanentemente?')) {
-                transacciones = transacciones.filter(t => t.id !== id);
-                guardarYActualizar();
+            try {
+                await addDoc(financeCollection, nueva);
+                form.reset();
+                document.getElementById('fecha').value = hoyStr;
+            } catch (e) {
+                alert("Error al guardar en la nube");
             }
-        }
+        };
 
-        function formatCurrency(num) {
-            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(num);
-        }
-
-        function getLabelCategoria(cat) {
-            const labels = {
-                'ingreso-clase': 'Pago Alumno',
-                'ingreso-paciente': 'Atención Paciente',
-                'ingreso-renta-consultorio': 'Renta Consultorio',
-                'ingreso-otro': 'Otro Ingreso',
-                'egreso-profesor': 'Pago Profesor',
-                'egreso-insumos': 'Insumos',
-                'egreso-renta': 'Renta Local',
-                'egreso-servicios': 'Servicios',
-                'egreso-otro': 'Otro Egreso'
-            };
-            return labels[cat] || 'Registro';
-        }
-
-        function exportarCSV() {
-            if (transacciones.length === 0) return alert("No hay datos para guardar.");
-            // Usar BOM para que Excel reconozca tildes y caracteres especiales
-            let csvContent = "\uFEFFFecha,Descripcion,Categoria,Tipo,Monto\n";
-            transacciones.forEach(t => {
-                csvContent += `${t.fecha},"${t.descripcion.replace(/"/g, '""')}",${t.categoria},${t.tipo},${t.monto}\n`;
-            });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `respaldo_finanzas_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function importarCSV(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const lines = text.split('\n');
-                const nuevosDatos = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    
-                    const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (parts.length >= 5) {
-                        nuevosDatos.push({
-                            id: Date.now() + i,
-                            fecha: parts[0],
-                            descripcion: parts[1].replace(/"/g, ''),
-                            categoria: parts[2],
-                            tipo: parts[3],
-                            monto: parseFloat(parts[4])
-                        });
-                    }
+        window.eliminarTransaccion = async (id) => {
+            if(confirm('¿Deseas eliminar este registro para todos?')) {
+                try {
+                    await deleteDoc(doc(db, "transacciones", id));
+                } catch (e) {
+                    alert("Error al borrar");
                 }
-                if (nuevosDatos.length > 0) {
-                    if (confirm(`Se encontraron ${nuevosDatos.length} registros. ¿Deseas agregarlos a tu lista actual?`)) {
-                        transacciones = [...nuevosDatos, ...transacciones];
-                        guardarYActualizar();
-                    }
-                }
-            };
-            reader.readAsText(file);
-        }
+            }
+        };
 
         function renderizar() {
             lista.innerHTML = '';
@@ -279,7 +238,7 @@
                         ${t.tipo === 'ingreso' ? '+' : '-'}${formatCurrency(t.monto)}
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <button onclick="eliminarTransaccion(${t.id})" class="text-slate-200 hover:text-rose-400 transition-colors">
+                        <button onclick="eliminarTransaccion('${t.id}')" class="text-slate-200 hover:text-rose-400 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -289,17 +248,41 @@
                 lista.appendChild(fila);
             });
 
-            if (transacciones.length === 0) emptyState.classList.remove('hidden');
-            else emptyState.classList.add('hidden');
-
             totalIngresosEl.textContent = formatCurrency(ingresosTotales);
             totalEgresosEl.textContent = formatCurrency(egresosTotales);
-            resumenDiaEl.innerHTML = `Balance del día: <span class="${totalDia >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatCurrency(totalDia)}</span>`;
+            resumenDiaEl.innerHTML = `Balance: <span class="${totalDia >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatCurrency(totalDia)}</span>`;
         }
 
-        form.addEventListener('submit', agregarTransaccion);
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(num);
+        }
+
+        function getLabelCategoria(cat) {
+            const labels = {
+                'ingreso-clase': 'Pago Alumno', 'ingreso-paciente': 'Atención Paciente',
+                'ingreso-renta-consultorio': 'Renta Consultorio', 'ingreso-otro': 'Otro Ingreso',
+                'egreso-profesor': 'Pago Profesor', 'egreso-insumos': 'Insumos',
+                'egreso-renta': 'Renta Local', 'egreso-servicios': 'Servicios',
+                'egreso-otro': 'Otro Egreso'
+            };
+            return labels[cat] || 'Registro';
+        }
+
+        window.exportarCSV = () => {
+            if (transacciones.length === 0) return alert("No hay datos.");
+            let csvContent = "\uFEFFFecha,Descripcion,Categoria,Tipo,Monto\n";
+            transacciones.forEach(t => {
+                csvContent += `${t.fecha},"${t.descripcion.replace(/"/g, '""')}",${t.categoria},${t.tipo},${t.monto}\n`;
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `reporte_finanzas.csv`;
+            link.click();
+        };
+
         filtroFechaEl.addEventListener('change', renderizar);
-        renderizar();
     </script>
 </body>
 </html>
