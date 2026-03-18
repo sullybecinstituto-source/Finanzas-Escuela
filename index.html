@@ -58,6 +58,16 @@
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-24">
         <div class="balance-card p-6 rounded-[2rem] text-white mb-6 shadow-xl text-center">
             <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest">Saldo en Caja (Real)</p>
+            <div class="flex gap-2 mb-6 border-b border-slate-100 pb-4">
+    <div class="flex gap-2 mb-6 border-b border-slate-100 pb-4">
+    <button onclick="exportarExcel()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl font-black text-[10px] uppercase shadow-sm transition-all">
+        📥 Descargar Respaldo
+    </button>
+    <label class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-xl font-black text-[10px] uppercase shadow-sm text-center cursor-pointer transition-all">
+        📤 Subir Respaldo
+        <input type="file" id="import-excel" class="hidden" accept=".xlsx, .xls" onchange="importarExcel(event)">
+    </label>
+</div>
             <h2 id="total-balance" class="text-5xl font-black mt-1">$0</h2>
             <div class="flex justify-center gap-8 mt-6">
                 <div><p class="text-[9px] font-bold uppercase opacity-60">Ingresos</p><p id="total-ingresos" class="text-sm font-black text-emerald-300">$0</p></div>
@@ -616,6 +626,68 @@
 
         // Set default date for new transactions
         document.getElementById('fecha-pago-real').valueAsDate = new Date();
+        // --- LÓGICA DE RESPALDO EXCEL CON VALIDACIÓN ---
+
+// 1. Cargar la librería necesaria
+const scriptExcel = document.createElement('script');
+scriptExcel.src = "https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js";
+document.head.appendChild(scriptExcel);
+
+// 2. Función para Exportar (Descargar)
+window.exportarExcel = () => {
+    try {
+        const wb = XLSX.utils.book_new();
+        
+        // Creamos hojas para Transacciones, Alumnos y Cursos
+        const wsTrans = XLSX.utils.json_to_sheet(transacciones || []);
+        const wsAlum = XLSX.utils.json_to_sheet(alumnos || []);
+        
+        XLSX.utils.book_append_sheet(wb, wsTrans, "Transacciones");
+        XLSX.utils.book_append_sheet(wb, wsAlum, "Alumnos");
+        
+        XLSX.writeFile(wb, `Respaldo_SuliBeck_${new Date().toLocaleDateString()}.xlsx`);
+    } catch (error) {
+        alert("Error al generar el Excel. Asegúrate de que la página cargó completamente.");
+    }
+};
+
+// 3. Función para Importar (Subir con validación de duplicados)
+window.importarExcel = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        let contadorNuevos = 0;
+
+        // Procesamos la hoja de Transacciones
+        const sheetTrans = workbook.Sheets["Transacciones"];
+        if (sheetTrans) {
+            const datosExcel = XLSX.utils.sheet_to_json(sheetTrans);
+            
+            for (const item of datosExcel) {
+                // VALIDACIÓN: Solo sube si no existe una transaccion con la misma fecha, monto y concepto
+                const duplicado = transacciones.find(t => 
+                    t.fecha === item.fecha && 
+                    t.monto === item.monto && 
+                    t.concepto === item.concepto
+                );
+
+                if (!duplicado) {
+                    const { id, ...dataSinId } = item; // Quitamos el ID viejo
+                    await addDoc(collection(db, "transacciones"), dataSinId);
+                    contadorNuevos++;
+                }
+            }
+        }
+
+        alert(`Proceso terminado. Se agregaron ${contadorNuevos} registros nuevos que no estaban en el sistema.`);
+        location.reload(); // Recargamos para ver los cambios
+    };
+    reader.readAsArrayBuffer(file);
+};
 
     </script>
 </body>
