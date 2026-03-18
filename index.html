@@ -74,13 +74,7 @@
 
         <section id="sec-finanzas" class="space-y-6">
             <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nuevo Movimiento</h3>
-                    <div class="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100">
-                        <span class="text-[8px] font-black text-rose-600 uppercase">Carga de Historial</span>
-                        <label class="switch"><input type="checkbox" id="solo-historial"><span class="slider"></span></label>
-                    </div>
-                    <div class="flex gap-2 mb-6 border-b border-slate-100 pb-4">
+                <div class="flex gap-2 mb-6 border-b border-slate-100 pb-4">
     <button onclick="exportarExcel()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl font-black text-[10px] uppercase shadow-sm transition-all">
         📥 Descargar Respaldo
     </button>
@@ -89,6 +83,12 @@
         <input type="file" id="import-excel" class="hidden" accept=".xlsx, .xls" onchange="importarExcel(event)">
     </label>
 </div>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nuevo Movimiento</h3>
+                    <div class="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100">
+                        <span class="text-[8px] font-black text-rose-600 uppercase">Carga de Historial</span>
+                        <label class="switch"><input type="checkbox" id="solo-historial"><span class="slider"></span></label>
+                    </div>
                 </div>
 
                 <form id="finance-form" class="space-y-4">
