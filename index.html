@@ -53,7 +53,7 @@
     </div>
 
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-24">
-        <!-- Dashboard Card -->
+        <!-- Balance View -->
         <div class="balance-card p-6 rounded-[2rem] text-white mb-6 shadow-xl text-center">
             <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest">Saldo en Caja (Real)</p>
             <h2 id="total-balance" class="text-5xl font-black mt-1">$0</h2>
@@ -70,14 +70,14 @@
             <button onclick="switchTab('cursos')" id="btn-cursos" class="flex-1 min-w-[100px] py-3 text-[10px] font-black uppercase text-slate-400 whitespace-nowrap">Cursos</button>
         </nav>
 
-        <!-- SECCIÓN FINANZAS -->
+        <!-- FINANCE SECTION -->
         <section id="sec-finanzas" class="space-y-6">
             <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nuevo Movimiento</h3>
                     <div class="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100">
-                        <span class="text-[8px] font-black text-rose-600 uppercase">Historial (No suma a caja)</span>
-                        <label class="switch"><input type="checkbox" id="solo-historial" checked><span class="slider"></span></label>
+                        <span class="text-[8px] font-black text-rose-600 uppercase">Carga de Historial (No suma $)</span>
+                        <label class="switch"><input type="checkbox" id="solo-historial"><span class="slider"></span></label>
                     </div>
                 </div>
 
@@ -86,7 +86,7 @@
                         <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Concepto</label>
                         <select id="categoria" onchange="toggleFields()" class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm text-indigo-950">
                             <optgroup label="Cobros">
-                                <option value="ingreso-clase">Pago de Clase (Diplomado / Abono)</option>
+                                <option value="ingreso-clase">Pago de Clase (Diplomado)</option>
                                 <option value="ingreso-renta">Renta de Consultorio</option>
                                 <option value="ingreso-otro">Otro Ingreso</option>
                             </optgroup>
@@ -99,52 +99,36 @@
                     <div id="fields-alumno" class="bg-indigo-50/50 p-4 rounded-2xl space-y-3 border border-indigo-100">
                         <select id="select-alumno" onchange="autoSugerirSesionYFecha()" class="w-full bg-white border-none rounded-lg p-3 text-sm font-bold shadow-sm text-indigo-900"></select>
                         <div class="grid grid-cols-2 gap-3">
-                            <div><label class="block text-[9px] font-bold text-indigo-400 mb-1 uppercase">Sesión N° (Ref)</label><input type="number" id="num-sesion" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold shadow-sm"></div>
-                            <div><label class="block text-[9px] font-bold text-indigo-400 mb-1 uppercase">Fecha que cubre</label><input type="date" id="fecha-clase-corresponde" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold shadow-sm"></div>
+                            <div><label class="block text-[9px] font-bold text-indigo-400 mb-1 uppercase">Sesión N°</label><input type="number" id="num-sesion" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold shadow-sm"></div>
+                            <div><label class="block text-[9px] font-bold text-indigo-400 mb-1 uppercase">Fecha de Clase</label><input type="date" id="fecha-clase-corresponde" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold shadow-sm"></div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Fecha del Recibo</label>
-                            <input type="date" id="fecha-pago-real" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Monto Recibido $</label>
-                            <input type="number" id="monto" placeholder="0.00" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
-                        </div>
+                        <input type="date" id="fecha-pago-real" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
+                        <input type="number" id="monto" placeholder="Monto $" required class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm">
                     </div>
 
-                    <input type="text" id="descripcion" placeholder="Notas adicionales (ej: abono para clases atrasadas)" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm">
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-xs">Registrar Movimiento</button>
+                    <input type="text" id="descripcion" placeholder="Notas..." class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm">
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase text-xs">Registrar Ahora</button>
                 </form>
             </div>
-            
-            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Movimientos Recientes</h3>
             <div id="lista-transacciones" class="space-y-2"></div>
         </section>
 
-        <!-- SECCIÓN ALUMNOS -->
+        <!-- STUDENTS SECTION -->
         <section id="sec-gestion" class="hidden space-y-6">
             <div id="form-alumno-container" class="bg-white border-2 border-indigo-100 rounded-[2rem] p-6 shadow-sm">
                 <h3 id="form-alumno-title" class="text-[11px] font-black text-indigo-600 uppercase mb-4">Registro / Edición de Alumno</h3>
                 <form id="alumno-form" class="space-y-3">
                     <input type="hidden" id="edit-id-alumno">
                     <input type="text" id="nombre-alumno" placeholder="Nombre Completo" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
-                    
-                    <select id="select-curso-alumno" onchange="syncAlumnoWithCursoDate()" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold"></select>
-                    
+                    <select id="select-curso-alumno" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold"></select>
                     <div class="grid grid-cols-2 gap-3">
                         <input type="text" id="curp-alumno" placeholder="CURP" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                         <input type="tel" id="tel-alumno" placeholder="Teléfono" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                     </div>
-
-                    <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
-                        <label class="block text-[9px] font-black text-indigo-400 uppercase mb-1">Fecha de Inicio de Pagos</label>
-                        <input type="date" id="fecha-inicio-alumno" required class="w-full bg-white border-none rounded-lg p-3 text-sm font-bold shadow-sm">
-                        <p class="text-[8px] text-indigo-400 mt-1">Sugerido por el diplomado, cámbielo si el alumno entró después.</p>
-                    </div>
-
+                    <input type="date" id="fecha-inicio-alumno" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                     <div class="flex gap-2">
                         <button type="submit" id="btn-submit-alumno" class="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-black text-xs uppercase">Guardar Alumno</button>
                         <button type="button" id="btn-cancelar-edit" onclick="cancelarEdicionAlum()" class="hidden bg-slate-200 text-slate-500 py-4 px-6 rounded-xl font-black text-xs uppercase">Cancelar</button>
@@ -154,32 +138,20 @@
             <div id="ui-alumnos" class="grid grid-cols-1 gap-3"></div>
         </section>
 
-        <!-- SECCIÓN CURSOS -->
+        <!-- COURSES SECTION -->
         <section id="sec-cursos" class="hidden space-y-6">
             <div id="form-curso-container" class="bg-white border-2 border-slate-900 rounded-[2rem] p-6 shadow-sm">
                 <h3 id="form-curso-title" class="text-[10px] font-black text-slate-400 uppercase mb-4">Nuevo Diplomado</h3>
                 <form id="curso-form" class="space-y-3">
                     <input type="hidden" id="edit-id-curso">
                     <input type="text" id="nombre-curso" placeholder="Nombre del Diplomado" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
-                    
                     <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Fecha Inicio Oficial</label>
-                            <input type="date" id="fecha-inicio-curso" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Fecha Término (Auto)</label>
-                            <input type="text" id="fecha-fin-curso-vista" readonly class="w-full bg-slate-100 border-none rounded-xl p-3 text-sm font-bold text-indigo-600" placeholder="---">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="duracion-curso" placeholder="Total de Sesiones" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
+                        <input type="number" id="duracion-curso" placeholder="Sesiones" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                         <input type="number" id="costo-clase" placeholder="Costo Sesión $" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                     </div>
 
                     <div class="bg-slate-50 p-3 rounded-xl">
-                        <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">Días Inactivos (Vacaciones)</label>
+                        <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">Fechas sin clase (Vacaciones/Feriados)</label>
                         <div class="flex gap-2 mb-2">
                             <input type="date" id="fecha-sin-clase" class="flex-1 bg-white border-none rounded-lg p-2 text-xs font-bold">
                             <button type="button" onclick="agregarFechaSinClase()" class="bg-rose-500 text-white px-4 rounded-lg text-[9px] font-black uppercase">Añadir</button>
@@ -196,6 +168,15 @@
             </div>
             <div id="ui-cursos" class="space-y-3"></div>
         </section>
+    </div>
+
+    <!-- History Modal -->
+    <div id="modal-historial" class="fixed inset-0 bg-white z-[100] hidden flex flex-col">
+        <div class="p-6 bg-indigo-900 text-white flex justify-between items-center">
+            <h2 id="modal-nombre" class="text-xl font-black uppercase">Historial</h2>
+            <button onclick="cerrarModal()" class="bg-white/20 px-4 py-2 rounded-xl text-xs font-bold uppercase">Cerrar</button>
+        </div>
+        <div id="modal-content" class="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-50"></div>
     </div>
 
     <script type="module">
@@ -215,15 +196,6 @@
         const db = getFirestore(app);
         
         let transacciones = [], alumnos = [], cursos = [];
-        let ultimoAlumnoSeleccionado = "";
-
-        function getHoyLocal() {
-            const d = new Date();
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
 
         onSnapshot(query(collection(db, "transacciones"), orderBy("timestamp", "desc")), (snap) => {
             transacciones = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -241,9 +213,10 @@
             cursos = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderCursos();
             populateSelects();
+            renderAlumnos();
         });
 
-        window.renderFinanzas = () => {
+        function renderFinanzas() {
             const ui = document.getElementById('lista-transacciones');
             ui.innerHTML = '';
             let i=0, e=0;
@@ -251,19 +224,16 @@
                 if(!t.soloHistorial) { t.tipo === 'ingreso' ? i += t.monto : e += t.monto; }
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm";
-                const subtext = t.fechaClase ? `<span class="text-indigo-500 font-black">PARA CLASE: ${t.fechaClase}</span>` : `RECIBO: ${t.fechaPago}`;
                 card.innerHTML = `
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2">
-                            <p class="text-[10px] font-black text-slate-800 uppercase leading-tight">${t.descripcion}</p>
-                            ${t.soloHistorial ? '<span class="bg-rose-100 text-rose-500 text-[7px] px-1.5 py-0.5 rounded-md font-black uppercase">Historial</span>' : ''}
-                        </div>
-                        <p class="text-[8px] font-bold text-slate-400 uppercase mt-1">${subtext} • SESIÓN ${t.numSesion || 'N/A'}</p>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-800 uppercase">${t.descripcion}</p>
+                        <p class="text-[8px] font-bold text-slate-400 uppercase">${t.fechaPago}</p>
                     </div>
-                    <div class="text-right ml-4">
+                    <div class="text-right">
                         <p class="font-black text-sm ${t.tipo === 'ingreso' ? 'text-emerald-500' : 'text-rose-500'} ${t.soloHistorial ? 'opacity-30' : ''}">$${t.monto}</p>
                         <button onclick="eliminarDoc('transacciones', '${t.id}')" class="text-[8px] font-bold text-slate-300 uppercase">Borrar</button>
-                    </div>`;
+                    </div>
+                `;
                 ui.appendChild(card);
             });
             document.getElementById('total-ingresos').innerText = `$${i.toLocaleString()}`;
@@ -274,134 +244,251 @@
         window.renderAlumnos = () => {
             const ui = document.getElementById('ui-alumnos');
             if(!ui) return;
-            const hoy = new Date(getHoyLocal() + "T00:00:00");
+            const hoy = new Date();
             ui.innerHTML = alumnos.map(a => {
-                // Sumar DINERO total pagado en lugar de solo contar entradas
-                const totalDineroPagado = transacciones
-                    .filter(t => t.alumno === a.nombre && t.categoria === 'ingreso-clase')
-                    .reduce((sum, t) => sum + (t.monto || 0), 0);
-                
+                const pagadas = transacciones.filter(t => t.alumno === a.nombre && t.categoria === 'ingreso-clase').length;
                 const cursoRelacionado = cursos.find(c => c.nombre === a.curso);
-                let estadoHTML = '';
                 
-                if(a.fechaInicio && cursoRelacionado){
+                let estadoHTML = '';
+                if(a.fechaInicio){
                     const fInicio = new Date(a.fechaInicio + "T00:00:00");
-                    let diffDias = Math.floor((hoy - fInicio) / (1000 * 60 * 60 * 24));
-                    let semanasTranscurridas = Math.floor(diffDias / 7) + 1;
-
-                    if(cursoRelacionado.fechasInactivas) {
+                    let diffSemanas = Math.floor((hoy - fInicio) / (1000 * 60 * 60 * 24 * 7)) + 1;
+                    
+                    if(cursoRelacionado && cursoRelacionado.fechasInactivas) {
                         const inactv = JSON.parse(cursoRelacionado.fechasInactivas);
                         inactv.forEach(fechaStr => {
                             const fInac = new Date(fechaStr + "T00:00:00");
-                            if(fInac >= fInicio && fInac <= hoy) semanasTranscurridas--;
+                            if(fInac >= fInicio && fInac <= hoy) {
+                                diffSemanas--;
+                            }
                         });
                     }
 
-                    const costoSesion = cursoRelacionado.costo || 0;
-                    const dineroDeberiaHaberPagado = semanasTranscurridas * costoSesion;
-                    const balanceAlumno = totalDineroPagado - dineroDeberiaHaberPagado;
-                    
-                    if(balanceAlumno >= 0) {
+                    const debe = diffSemanas - pagadas;
+                    if(debe <= 0) {
                         estadoHTML = `<span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded-md text-[8px] font-black uppercase">Al Corriente</span>`;
                     } else {
-                        const faltaDinero = Math.abs(balanceAlumno);
-                        const clasesFaltantes = Math.ceil(faltaDinero / costoSesion);
-                        estadoHTML = `<span class="bg-rose-100 text-rose-600 px-2 py-1 rounded-md text-[8px] font-black uppercase">Deuda: $${faltaDinero} (~${clasesFaltantes} cls)</span>`;
+                        estadoHTML = `<span class="bg-rose-100 text-rose-600 px-2 py-1 rounded-md text-[8px] font-black uppercase">Debe ${debe} ${debe === 1 ? 'Clase' : 'Clases'}</span>`;
                     }
                 }
-                
-                return `<div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm card-alumno">
+
+                return `
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm card-alumno">
                     <div class="flex justify-between items-start">
-                        <div class="flex-1">
+                        <div onclick="verHistorial('${a.nombre}')" class="flex-1 cursor-pointer">
                             <div class="flex items-center gap-2">
                                 <p class="font-black text-sm text-indigo-950 uppercase">${a.nombre}</p>
                                 ${estadoHTML}
                             </div>
                             <p class="text-[9px] font-black text-indigo-500 uppercase mt-1">${a.curso || 'Sin curso'}</p>
-                            <div class="flex gap-4 mt-2">
-                                <p class="text-[8px] font-bold text-slate-400">PAGADO: <span class="text-slate-600">$${totalDineroPagado}</span></p>
-                                <p class="text-[8px] font-bold text-slate-400">COSTO CLASE: <span class="text-slate-600">$${cursoRelacionado?.costo || 0}</span></p>
+                            <div class="mt-3 flex flex-wrap gap-3">
+                                <span class="text-[8px] font-bold text-slate-400">TEL: ${a.telefono || '---'}</span>
+                                <span class="text-[8px] font-bold text-slate-400">PAGADAS: ${pagadas}</span>
                             </div>
                         </div>
-                        <button onclick="prepararEdicionAlum('${a.id}')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Editar</button>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="prepararEdicionAlum('${a.id}')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Editar</button>
+                            <button onclick="eliminarDoc('alumnos', '${a.id}')" class="text-rose-300 text-[8px] font-bold uppercase">Borrar</button>
+                        </div>
                     </div>
-                </div>`;
-            }).join('');
+                </div>
+            `;}).join('');
         }
 
         window.renderCursos = () => {
             const ui = document.getElementById('ui-cursos');
             ui.innerHTML = cursos.map(c => `
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center">
-                    <div class="cursor-pointer flex-1">
+                    <div class="cursor-pointer flex-1" onclick="prepararEdicionCurso('${c.id}')">
                         <p class="font-black text-sm text-slate-800 uppercase">${c.nombre}</p>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">${c.duracion} Sesiones • $${c.costo} por Sesión</p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase">${c.duracion} Sesiones • $${c.costo}</p>
+                        ${c.fechasInactivas && JSON.parse(c.fechasInactivas).length > 0 ? 
+                            `<p class="text-[7px] text-rose-400 font-bold uppercase mt-1">${JSON.parse(c.fechasInactivas).length} fechas sin clase registradas</p>` : ''}
                     </div>
                     <button onclick="eliminarDoc('cursos', '${c.id}')" class="text-rose-300 text-[8px] font-bold uppercase">Borrar</button>
-                </div>`).join('');
+                </div>
+            `).join('');
         }
 
         function populateSelects() {
             const sA = document.getElementById('select-alumno');
-            if(sA) {
-                sA.innerHTML = '<option value="">Seleccionar Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
-                if(ultimoAlumnoSeleccionado) sA.value = ultimoAlumnoSeleccionado;
-            }
+            if(sA) sA.innerHTML = '<option value="">Selecciona Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
             const sC = document.getElementById('select-curso-alumno');
-            if(sC) sC.innerHTML = '<option value="">Asignar Diplomado...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+            if(sC) sC.innerHTML = '<option value="">Selecciona Curso...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
         }
 
+        // --- INACTIVE DATES LOGIC ---
+        window.agregarFechaSinClase = () => {
+            const fInput = document.getElementById('fecha-sin-clase');
+            const listaJson = document.getElementById('fechas-inactivas-json');
+            if(!fInput.value) return;
+
+            let fechas = JSON.parse(listaJson.value || "[]");
+            if(!fechas.includes(fInput.value)) {
+                fechas.push(fInput.value);
+                listaJson.value = JSON.stringify(fechas);
+                actualizarListaVisualInactivas(fechas);
+            }
+            fInput.value = "";
+        };
+
+        window.quitarFechaSinClase = (f) => {
+            const listaJson = document.getElementById('fechas-inactivas-json');
+            let fechas = JSON.parse(listaJson.value || "[]");
+            fechas = fechas.filter(x => x !== f);
+            listaJson.value = JSON.stringify(fechas);
+            actualizarListaVisualInactivas(fechas);
+        };
+
+        function actualizarListaVisualInactivas(fechas) {
+            const container = document.getElementById('lista-fechas-inactivas');
+            container.innerHTML = fechas.map(f => `
+                <div class="bg-rose-100 text-rose-600 px-2 py-1 rounded-lg text-[8px] font-black flex items-center gap-1">
+                    ${f} <span onclick="quitarFechaSinClase('${f}')" class="text-[10px] cursor-pointer">×</span>
+                </div>
+            `).join('');
+        }
+
+        // --- SMART DATE SUGGESTION ---
         window.autoSugerirSesionYFecha = () => {
             const nombre = document.getElementById('select-alumno').value;
-            ultimoAlumnoSeleccionado = nombre;
             const a = alumnos.find(x => x.nombre === nombre);
             if (!a) return;
+            
             const c = cursos.find(x => x.nombre === a.curso);
+            const pagadas = transacciones.filter(t => t.alumno === nombre && t.categoria === 'ingreso-clase').length;
             
-            // Sugerir sesión basándose en conteo de registros previos
-            const registrosPrevios = transacciones.filter(t => t.alumno === nombre && t.categoria === 'ingreso-clase').length;
-            document.getElementById('num-sesion').value = registrosPrevios + 1;
-            
-            // Sugerir monto del curso por defecto (el usuario puede cambiarlo para abonos)
+            document.getElementById('num-sesion').value = pagadas + 1;
             document.getElementById('monto').value = c ? c.costo : 0;
-            
-            const fechaBaseStr = a.fechaInicio || c?.fechaInicio;
-            if(fechaBaseStr) {
-                let fechaSugerida = new Date(fechaBaseStr + "T00:00:00");
-                let inactivas = c?.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
+
+            if(a.fechaInicio) {
+                let fechaBase = new Date(a.fechaInicio + "T00:00:00");
+                let fechasInactivas = c?.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
+                
+                // Calculamos la fecha tentativa sumando semanas
+                let clasesPorSaltar = pagadas;
+                let fechaSugerida = new Date(fechaBase);
+
+                // Lógica iterativa para encontrar la fecha correcta saltando asuetos
                 let clasesContadas = 0;
-                while (clasesContadas < registrosPrevios) {
+                while (clasesContadas < clasesPorSaltar) {
                     fechaSugerida.setDate(fechaSugerida.getDate() + 7);
-                    if (!inactivas.includes(fechaSugerida.toISOString().split('T')[0])) clasesContadas++;
+                    let strFecha = fechaSugerida.toISOString().split('T')[0];
+                    if (!fechasInactivas.includes(strFecha)) {
+                        clasesContadas++;
+                    }
                 }
-                while (inactivas.includes(fechaSugerida.toISOString().split('T')[0])) fechaSugerida.setDate(fechaSugerida.getDate() + 7);
+
+                // Finalmente, si la fecha resultante cae en un asueto, saltar a la siguiente semana disponible
+                while (fechasInactivas.includes(fechaSugerida.toISOString().split('T')[0])) {
+                    fechaSugerida.setDate(fechaSugerida.getDate() + 7);
+                }
+
                 document.getElementById('fecha-clase-corresponde').value = fechaSugerida.toISOString().split('T')[0];
             }
+        };
+
+        // EDITING STUDENTS
+        window.prepararEdicionAlum = (id) => {
+            const a = alumnos.find(x => x.id === id);
+            if(!a) return;
+            switchTab('gestion');
+            document.getElementById('edit-id-alumno').value = a.id;
+            document.getElementById('nombre-alumno').value = a.nombre;
+            document.getElementById('select-curso-alumno').value = a.curso || '';
+            document.getElementById('curp-alumno').value = a.curp || '';
+            document.getElementById('tel-alumno').value = a.telefono || '';
+            document.getElementById('fecha-inicio-alumno').value = a.fechaInicio || '';
+            document.getElementById('form-alumno-title').innerText = "Editando: " + a.nombre;
+            document.getElementById('btn-submit-alumno').innerText = "Actualizar Alumno";
+            document.getElementById('btn-cancelar-edit').classList.remove('hidden');
+        };
+
+        window.cancelarEdicionAlum = () => {
+            document.getElementById('alumno-form').reset();
+            document.getElementById('edit-id-alumno').value = "";
+            document.getElementById('form-alumno-title').innerText = "Registro de Alumno";
+            document.getElementById('btn-submit-alumno').innerText = "Guardar Alumno";
+            document.getElementById('btn-cancelar-edit').classList.add('hidden');
+        };
+
+        // EDITING COURSES
+        window.prepararEdicionCurso = (id) => {
+            const c = cursos.find(x => x.id === id);
+            if(!c) return;
+            document.getElementById('edit-id-curso').value = c.id;
+            document.getElementById('nombre-curso').value = c.nombre;
+            document.getElementById('duracion-curso').value = c.duracion;
+            document.getElementById('costo-clase').value = c.costo;
+            
+            const fechas = c.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
+            document.getElementById('fechas-inactivas-json').value = JSON.stringify(fechas);
+            actualizarListaVisualInactivas(fechas);
+
+            document.getElementById('form-curso-title').innerText = "Editando Diplomado: " + c.nombre;
+            document.getElementById('btn-submit-curso').innerText = "Actualizar";
+            document.getElementById('btn-cancelar-curso').classList.remove('hidden');
+        };
+
+        window.cancelarEdicionCurso = () => {
+            document.getElementById('curso-form').reset();
+            document.getElementById('edit-id-curso').value = "";
+            document.getElementById('fechas-inactivas-json').value = "[]";
+            document.getElementById('lista-fechas-inactivas').innerHTML = "";
+            document.getElementById('form-curso-title').innerText = "Nuevo Diplomado";
+            document.getElementById('btn-submit-curso').innerText = "Guardar Curso";
+            document.getElementById('btn-cancelar-curso').classList.add('hidden');
+        };
+
+        document.getElementById('alumno-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id-alumno').value;
+            const data = {
+                nombre: document.getElementById('nombre-alumno').value,
+                curso: document.getElementById('select-curso-alumno').value,
+                curp: document.getElementById('curp-alumno').value,
+                telefono: document.getElementById('tel-alumno').value,
+                fechaInicio: document.getElementById('fecha-inicio-alumno').value
+            };
+            id ? await updateDoc(doc(db, "alumnos", id), data) : await addDoc(collection(db, "alumnos"), data);
+            cancelarEdicionAlum();
+        };
+
+        document.getElementById('curso-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id-curso').value;
+            const data = {
+                nombre: document.getElementById('nombre-curso').value,
+                duracion: document.getElementById('duracion-curso').value,
+                costo: document.getElementById('costo-clase').value,
+                fechasInactivas: document.getElementById('fechas-inactivas-json').value
+            };
+            id ? await updateDoc(doc(db, "cursos", id), data) : await addDoc(collection(db, "cursos"), data);
+            cancelarEdicionCurso();
         };
 
         document.getElementById('finance-form').onsubmit = async (e) => {
             e.preventDefault();
             const cat = document.getElementById('categoria').value;
-            const soloHist = document.getElementById('solo-historial').checked;
             const data = {
                 categoria: cat,
                 tipo: cat.startsWith('ingreso') ? 'ingreso' : 'egreso',
                 monto: parseFloat(document.getElementById('monto').value),
                 fechaPago: document.getElementById('fecha-pago-real').value,
                 timestamp: Date.now(),
-                soloHistorial: soloHist
+                soloHistorial: document.getElementById('solo-historial').checked
             };
             if(cat === 'ingreso-clase') {
                 data.alumno = document.getElementById('select-alumno').value;
                 data.numSesion = document.getElementById('num-sesion').value;
                 data.fechaClase = document.getElementById('fecha-clase-corresponde').value;
-                data.descripcion = `PAGO/ABONO ${data.alumno} (S${data.numSesion})`;
+                data.descripcion = `SESIÓN ${data.numSesion}: ${data.alumno}`;
             } else {
                 data.descripcion = document.getElementById('descripcion').value || cat.toUpperCase();
             }
             await addDoc(collection(db, "transacciones"), data);
-            if (cat === 'ingreso-clase') autoSugerirSesionYFecha();
-            else { document.getElementById('finance-form').reset(); resetFechas(); }
+            document.getElementById('finance-form').reset();
+            resetFechas();
         };
 
         window.switchTab = (t) => {
@@ -410,74 +497,26 @@
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active'));
             document.getElementById(`btn-${t}`).classList.add('tab-active');
         };
-
         window.toggleFields = () => document.getElementById('fields-alumno').classList.toggle('hidden', document.getElementById('categoria').value !== 'ingreso-clase');
-        window.eliminarDoc = async (c, id) => { if(confirm("¿Seguro de borrar este registro?")) await deleteDoc(doc(db, c, id)); };
-
+        window.eliminarDoc = async (c, id) => { if(confirm("¿Seguro?")) await deleteDoc(doc(db, c, id)); };
+        window.verHistorial = (n) => {
+            const p = transacciones.filter(t => t.alumno === n);
+            document.getElementById('modal-nombre').innerText = n;
+            document.getElementById('modal-content').innerHTML = p.map(x => `
+                <div class="bg-white p-3 rounded-xl border border-slate-200 flex justify-between">
+                    <div><p class="text-[10px] font-black uppercase">${x.categoria === 'ingreso-clase' ? 'SESIÓN '+x.numSesion : x.descripcion}</p><p class="text-[8px] text-slate-400">${x.fechaPago}</p></div>
+                    <p class="font-black text-sm">$${x.monto}</p>
+                </div>
+            `).join('') || '<p class="text-center text-slate-400 py-10">Sin historial</p>';
+            document.getElementById('modal-historial').classList.remove('hidden');
+        };
+        window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
         const resetFechas = () => {
-            const h = getHoyLocal();
+            const h = new Date().toISOString().split('T')[0];
             document.getElementById('fecha-pago-real').value = h;
             document.getElementById('fecha-clase-corresponde').value = h;
         };
         resetFechas();
-
-        // Funciones para Cursos (Inactivas)
-        window.agregarFechaSinClase = () => {
-            const f = document.getElementById('fecha-sin-clase').value;
-            if(!f) return;
-            const lista = JSON.parse(document.getElementById('fechas-inactivas-json').value);
-            if(!lista.includes(f)) {
-                lista.push(f);
-                document.getElementById('fechas-inactivas-json').value = JSON.stringify(lista);
-                renderFechasInactivas();
-            }
-        };
-
-        function renderFechasInactivas() {
-            const lista = JSON.parse(document.getElementById('fechas-inactivas-json').value);
-            document.getElementById('lista-fechas-inactivas').innerHTML = lista.map(f => `
-                <span class="bg-rose-100 text-rose-600 px-2 py-1 rounded-lg text-[8px] font-black flex items-center gap-1">
-                    ${f} <button type="button" onclick="quitarFechaInactiva('${f}')">×</button>
-                </span>
-            `).join('');
-        }
-
-        window.quitarFechaInactiva = (f) => {
-            let lista = JSON.parse(document.getElementById('fechas-inactivas-json').value);
-            lista = lista.filter(x => x !== f);
-            document.getElementById('fechas-inactivas-json').value = JSON.stringify(lista);
-            renderFechasInactivas();
-        };
-
-        document.getElementById('curso-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit-id-curso').value;
-            const data = {
-                nombre: document.getElementById('nombre-curso').value,
-                fechaInicio: document.getElementById('fecha-inicio-curso').value,
-                duracion: parseInt(document.getElementById('duracion-curso').value),
-                costo: parseFloat(document.getElementById('costo-clase').value),
-                fechasInactivas: document.getElementById('fechas-inactivas-json').value
-            };
-            if(id) await updateDoc(doc(db, "cursos", id), data);
-            else await addDoc(collection(db, "cursos"), data);
-            document.getElementById('curso-form').reset();
-            document.getElementById('fechas-inactivas-json').value = "[]";
-            renderFechasInactivas();
-        };
-
-        document.getElementById('alumno-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const data = {
-                nombre: document.getElementById('nombre-alumno').value,
-                curso: document.getElementById('select-curso-alumno').value,
-                curp: document.getElementById('curp-alumno').value,
-                tel: document.getElementById('tel-alumno').value,
-                fechaInicio: document.getElementById('fecha-inicio-alumno').value
-            };
-            await addDoc(collection(db, "alumnos"), data);
-            document.getElementById('alumno-form').reset();
-        };
     </script>
 </body>
 </html>
