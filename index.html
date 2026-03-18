@@ -53,7 +53,7 @@
     </div>
 
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-24">
-        <!-- Balance View -->
+        <!-- Dashboard Card -->
         <div class="balance-card p-6 rounded-[2rem] text-white mb-6 shadow-xl text-center">
             <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest">Saldo en Caja (Real)</p>
             <h2 id="total-balance" class="text-5xl font-black mt-1">$0</h2>
@@ -70,13 +70,13 @@
             <button onclick="switchTab('cursos')" id="btn-cursos" class="flex-1 min-w-[100px] py-3 text-[10px] font-black uppercase text-slate-400 whitespace-nowrap">Cursos</button>
         </nav>
 
-        <!-- FINANCE SECTION -->
+        <!-- SECCIÓN FINANZAS -->
         <section id="sec-finanzas" class="space-y-6">
             <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nuevo Movimiento</h3>
                     <div class="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100">
-                        <span class="text-[8px] font-black text-rose-600 uppercase">Carga de Historial</span>
+                        <span class="text-[8px] font-black text-rose-600 uppercase">Historial (No suma a caja)</span>
                         <label class="switch"><input type="checkbox" id="solo-historial" checked><span class="slider"></span></label>
                     </div>
                 </div>
@@ -124,19 +124,28 @@
             <div id="lista-transacciones" class="space-y-2"></div>
         </section>
 
-        <!-- STUDENTS SECTION -->
+        <!-- SECCIÓN ALUMNOS -->
         <section id="sec-gestion" class="hidden space-y-6">
             <div id="form-alumno-container" class="bg-white border-2 border-indigo-100 rounded-[2rem] p-6 shadow-sm">
                 <h3 id="form-alumno-title" class="text-[11px] font-black text-indigo-600 uppercase mb-4">Registro / Edición de Alumno</h3>
                 <form id="alumno-form" class="space-y-3">
                     <input type="hidden" id="edit-id-alumno">
                     <input type="text" id="nombre-alumno" placeholder="Nombre Completo" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
-                    <select id="select-curso-alumno" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold"></select>
+                    
+                    <!-- Sincronización automática de fecha al seleccionar curso -->
+                    <select id="select-curso-alumno" onchange="syncAlumnoWithCursoDate()" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold"></select>
+                    
                     <div class="grid grid-cols-2 gap-3">
                         <input type="text" id="curp-alumno" placeholder="CURP" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                         <input type="tel" id="tel-alumno" placeholder="Teléfono" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                     </div>
-                    <input type="date" id="fecha-inicio-alumno" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
+
+                    <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+                        <label class="block text-[9px] font-black text-indigo-400 uppercase mb-1">Fecha de Inicio de Pagos</label>
+                        <input type="date" id="fecha-inicio-alumno" required class="w-full bg-white border-none rounded-lg p-3 text-sm font-bold shadow-sm">
+                        <p class="text-[8px] text-indigo-400 mt-1">Sugerido por el diplomado, cámbielo si el alumno entró después.</p>
+                    </div>
+
                     <div class="flex gap-2">
                         <button type="submit" id="btn-submit-alumno" class="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-black text-xs uppercase">Guardar Alumno</button>
                         <button type="button" id="btn-cancelar-edit" onclick="cancelarEdicionAlum()" class="hidden bg-slate-200 text-slate-500 py-4 px-6 rounded-xl font-black text-xs uppercase">Cancelar</button>
@@ -146,7 +155,7 @@
             <div id="ui-alumnos" class="grid grid-cols-1 gap-3"></div>
         </section>
 
-        <!-- COURSES SECTION -->
+        <!-- SECCIÓN CURSOS -->
         <section id="sec-cursos" class="hidden space-y-6">
             <div id="form-curso-container" class="bg-white border-2 border-slate-900 rounded-[2rem] p-6 shadow-sm">
                 <h3 id="form-curso-title" class="text-[10px] font-black text-slate-400 uppercase mb-4">Nuevo Diplomado</h3>
@@ -156,7 +165,7 @@
                     
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Fecha Inicio</label>
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-1">Fecha Inicio Oficial</label>
                             <input type="date" id="fecha-inicio-curso" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                         </div>
                         <div>
@@ -166,12 +175,12 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="duracion-curso" placeholder="Sesiones" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
+                        <input type="number" id="duracion-curso" placeholder="Total de Sesiones" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                         <input type="number" id="costo-clase" placeholder="Costo Sesión $" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                     </div>
 
                     <div class="bg-slate-50 p-3 rounded-xl">
-                        <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">Fechas sin clase (Vacaciones/Feriados)</label>
+                        <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">Días Inactivos (Vacaciones)</label>
                         <div class="flex gap-2 mb-2">
                             <input type="date" id="fecha-sin-clase" class="flex-1 bg-white border-none rounded-lg p-2 text-xs font-bold">
                             <button type="button" onclick="agregarFechaSinClase()" class="bg-rose-500 text-white px-4 rounded-lg text-[9px] font-black uppercase">Añadir</button>
@@ -190,12 +199,12 @@
         </section>
     </div>
 
-    <!-- History Modal -->
+    <!-- Modal Historial -->
     <div id="modal-historial" class="fixed inset-0 bg-white z-[100] hidden flex flex-col">
         <div class="p-6 bg-indigo-900 text-white flex justify-between items-center">
             <div>
                 <h2 id="modal-nombre" class="text-xl font-black uppercase tracking-tight">Historial</h2>
-                <p class="text-[9px] opacity-70 font-bold uppercase tracking-widest mt-1">Gestión de Cobros Pasados</p>
+                <p class="text-[9px] opacity-70 font-bold uppercase tracking-widest mt-1">Cargos y Pagos Históricos</p>
             </div>
             <button onclick="cerrarModal()" class="bg-white/20 px-4 py-2 rounded-xl text-xs font-bold uppercase">Cerrar</button>
         </div>
@@ -221,6 +230,7 @@
         let transacciones = [], alumnos = [], cursos = [];
         let ultimoAlumnoSeleccionado = "";
 
+        // LISTENERS
         onSnapshot(query(collection(db, "transacciones"), orderBy("timestamp", "desc")), (snap) => {
             transacciones = snap.docs.map(d => ({id: d.id, ...d.data()}));
             renderFinanzas();
@@ -243,6 +253,18 @@
             populateSelects();
             renderAlumnos();
         });
+
+        // CORE LOGIC: Sincronizar fecha al asignar curso a un alumno
+        window.syncAlumnoWithCursoDate = () => {
+            const courseName = document.getElementById('select-curso-alumno').value;
+            if(!courseName) return;
+            
+            const selectedCourse = cursos.find(c => c.nombre === courseName);
+            if(selectedCourse && selectedCourse.fechaInicio) {
+                // Se pone la fecha por defecto pero es editable por el usuario
+                document.getElementById('fecha-inicio-alumno').value = selectedCourse.fechaInicio;
+            }
+        };
 
         function renderFinanzas() {
             const ui = document.getElementById('lista-transacciones');
@@ -342,7 +364,7 @@
                     <div class="cursor-pointer flex-1" onclick="prepararEdicionCurso('${c.id}')">
                         <p class="font-black text-sm text-slate-800 uppercase">${c.nombre}</p>
                         <p class="text-[9px] font-bold text-slate-400 uppercase">${c.duracion} Sesiones • $${c.costo}</p>
-                        <p class="text-[8px] font-black text-indigo-500 uppercase mt-1">DEL ${c.fechaInicio} AL ${fin}</p>
+                        <p class="text-[8px] font-black text-indigo-500 uppercase mt-1">INICIA: ${c.fechaInicio} | TERMINA: ${fin}</p>
                     </div>
                     <button onclick="eliminarDoc('cursos', '${c.id}')" class="text-rose-300 text-[8px] font-bold uppercase">Borrar</button>
                 </div>
@@ -381,13 +403,11 @@
         function populateSelects() {
             const sA = document.getElementById('select-alumno');
             if(sA) {
-                sA.innerHTML = '<option value="">Selecciona Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
-                if(ultimoAlumnoSeleccionado) {
-                    sA.value = ultimoAlumnoSeleccionado;
-                }
+                sA.innerHTML = '<option value="">Seleccionar Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
+                if(ultimoAlumnoSeleccionado) sA.value = ultimoAlumnoSeleccionado;
             }
             const sC = document.getElementById('select-curso-alumno');
-            if(sC) sC.innerHTML = '<option value="">Selecciona Curso...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+            if(sC) sC.innerHTML = '<option value="">Asignar Diplomado...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
         }
 
         window.agregarFechaSinClase = () => {
@@ -578,21 +598,14 @@
                 data.numSesion = document.getElementById('num-sesion').value;
                 data.fechaClase = document.getElementById('fecha-clase-corresponde').value;
                 data.descripcion = `PAGO SESIÓN ${data.numSesion}: ${data.alumno}`;
-                
                 ultimoAlumnoSeleccionado = data.alumno;
             } else {
                 data.descripcion = document.getElementById('descripcion').value || cat.toUpperCase();
             }
             
             await addDoc(collection(db, "transacciones"), data);
-            
-            if (cat === 'ingreso-clase') {
-                // Pre-cargar para el siguiente registro del mismo alumno
-                autoSugerirSesionYFecha();
-            } else {
-                document.getElementById('finance-form').reset();
-                resetFechas();
-            }
+            if (cat === 'ingreso-clase') autoSugerirSesionYFecha();
+            else { document.getElementById('finance-form').reset(); resetFechas(); }
         };
 
         window.switchTab = (t) => {
@@ -602,7 +615,7 @@
             document.getElementById(`btn-${t}`).classList.add('tab-active');
         };
         window.toggleFields = () => document.getElementById('fields-alumno').classList.toggle('hidden', document.getElementById('categoria').value !== 'ingreso-clase');
-        window.eliminarDoc = async (c, id) => { if(confirm("¿Seguro?")) await deleteDoc(doc(db, c, id)); };
+        window.eliminarDoc = async (c, id) => { if(confirm("¿Seguro de borrar este registro?")) await deleteDoc(doc(db, c, id)); };
         
         window.verHistorial = (n) => {
             const p = transacciones.filter(t => t.alumno === n);
@@ -616,20 +629,18 @@
                             </p>
                             ${x.soloHistorial ? '<span class="bg-rose-500 text-white text-[6px] px-1.5 py-0.5 rounded font-black">HISTORIAL</span>' : ''}
                         </div>
-                        <p class="text-[8px] text-slate-400 font-bold mt-1">
-                            RECIBO: ${x.fechaPago}
-                        </p>
+                        <p class="text-[8px] text-slate-400 font-bold mt-1">RECIBO: ${x.fechaPago}</p>
                         ${x.fechaClase ? `<p class="text-[8px] text-indigo-500 font-black">PARA: ${x.fechaClase}</p>` : ''}
                     </div>
                     <div class="text-right flex flex-col items-end gap-2">
                         <p class="font-black text-sm ${x.soloHistorial ? 'text-slate-400' : 'text-slate-800'}">$${x.monto}</p>
                         <button onclick="toggleHistorialPago('${x.id}', ${x.soloHistorial || false})" 
                                 class="text-[7px] font-black uppercase px-2 py-1 rounded-lg border ${x.soloHistorial ? 'bg-indigo-600 text-white border-indigo-600' : 'border-slate-300 text-slate-500'}">
-                            ${x.soloHistorial ? 'Activar en Caja' : 'Pasar a Historial'}
+                            ${x.soloHistorial ? 'A CAJA' : 'A HISTORIAL'}
                         </button>
                     </div>
                 </div>
-            `).join('') || '<p class="text-center text-slate-400 py-10">Sin historial registrado aún.</p>';
+            `).join('') || '<p class="text-center text-slate-400 py-10 uppercase text-[10px] font-black">Sin registros</p>';
             document.getElementById('modal-historial').classList.remove('hidden');
         };
 
