@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SullyBec Instituto - Gestión Integral</title>
+    <title>Suli Beck Instituto - Gestión Integral</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -39,12 +39,12 @@
             <div class="flex items-center gap-3">
                 <div class="logo-box w-11 h-11 rounded-xl flex items-center justify-center border border-slate-200">
                     <img src="https://lh3.googleusercontent.com/d/1gjM8QJhfynpT0il86P3IRWwD_wMQWcCC" 
-                         alt="SullyBec Logo" 
+                         alt="Suli Beck Logo" 
                          class="w-full h-full object-cover"
                          onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-indigo-600 font-black text-xl\'>SB</span>';">
                 </div>
                 <div>
-                    <h1 class="text-lg font-extrabold text-indigo-950 tracking-tight leading-none">SullyBec</h1>
+                    <h1 class="text-lg font-extrabold text-indigo-950 tracking-tight leading-none">Suli Beck</h1>
                     <p class="text-[8px] font-bold text-rose-400 uppercase tracking-widest mt-0.5">Instituto</p>
                 </div>
             </div>
@@ -56,7 +56,6 @@
     </div>
 
     <div class="max-w-4xl mx-auto px-4 pt-4 pb-24">
-        <!-- Balance View -->
         <div class="balance-card p-6 rounded-[2rem] text-white mb-6 shadow-xl text-center">
             <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest">Saldo en Caja (Real)</p>
             <h2 id="total-balance" class="text-5xl font-black mt-1">$0</h2>
@@ -66,14 +65,12 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
         <nav class="flex mb-6 bg-white p-1 rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
             <button onclick="switchTab('finanzas')" id="btn-finanzas" class="flex-1 min-w-[100px] py-3 text-[10px] font-black uppercase tab-active whitespace-nowrap">Cobros Rápidos</button>
             <button onclick="switchTab('gestion')" id="btn-gestion" class="flex-1 min-w-[100px] py-3 text-[10px] font-black uppercase text-slate-400 whitespace-nowrap">Alumnos</button>
             <button onclick="switchTab('cursos')" id="btn-cursos" class="flex-1 min-w-[100px] py-3 text-[10px] font-black uppercase text-slate-400 whitespace-nowrap">Cursos</button>
         </nav>
 
-        <!-- FINANCE SECTION -->
         <section id="sec-finanzas" class="space-y-6">
             <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
@@ -129,7 +126,6 @@
             <div id="lista-transacciones" class="space-y-2"></div>
         </section>
 
-        <!-- STUDENTS SECTION -->
         <section id="sec-gestion" class="hidden space-y-6">
             <div id="form-alumno-container" class="bg-white border-2 border-indigo-100 rounded-[2rem] p-6 shadow-sm">
                 <h3 id="form-alumno-title" class="text-[11px] font-black text-indigo-600 uppercase mb-4">Registro / Edición de Alumno</h3>
@@ -153,15 +149,26 @@
             <div id="ui-alumnos" class="grid grid-cols-1 gap-3"></div>
         </section>
 
-        <!-- COURSES SECTION -->
         <section id="sec-cursos" class="hidden space-y-6">
             <div id="form-curso-container" class="bg-white border-2 border-slate-900 rounded-[2rem] p-6 shadow-sm">
                 <h3 id="form-curso-title" class="text-[10px] font-black text-slate-400 uppercase mb-4">Nuevo Diplomado</h3>
                 <form id="curso-form" class="space-y-3">
                     <input type="hidden" id="edit-id-curso">
                     <input type="text" id="nombre-curso" placeholder="Nombre del Diplomado" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
+                    
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="number" id="duracion-curso" placeholder="Sesiones" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Inicio del Curso</label>
+                            <input type="date" id="fecha-inicio-curso" required onchange="window.calcularFechaTermino()" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold text-indigo-600">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Término (Auto)</label>
+                            <input type="date" id="fecha-termino-curso" readonly class="w-full bg-slate-200 border-none rounded-xl p-3 text-sm font-bold text-slate-500 cursor-not-allowed">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" id="duracion-curso" placeholder="Sesiones" required onchange="window.calcularFechaTermino()" onkeyup="window.calcularFechaTermino()" class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                         <input type="number" id="costo-clase" placeholder="Costo Sesión $" required class="w-full bg-slate-50 border-none rounded-xl p-3 text-sm font-bold">
                     </div>
 
@@ -185,7 +192,6 @@
         </section>
     </div>
 
-    <!-- History Modal -->
     <div id="modal-historial" class="fixed inset-0 bg-white z-[100] hidden flex flex-col">
         <div class="p-6 bg-indigo-900 text-white flex justify-between items-center">
             <h2 id="modal-nombre" class="text-xl font-black uppercase tracking-tight">Historial</h2>
@@ -198,7 +204,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // Configuración de Firebase (Se asume la misma proporcionada)
         const firebaseConfig = {
             apiKey: "AIzaSyCcAda5-ewiR78bfLyYrjEMhfdc0RFxd7s",
             authDomain: "finanzas-escuela.firebaseapp.com",
@@ -330,6 +335,7 @@
                     <div class="cursor-pointer flex-1" onclick="window.prepararEdicionCurso('${c.id}')">
                         <p class="font-black text-sm text-slate-800 uppercase">${c.nombre}</p>
                         <p class="text-[9px] font-bold text-slate-400 uppercase">${c.duracion} Sesiones • $${c.costo}</p>
+                        ${c.fechaInicio ? `<p class="text-[9px] font-bold text-indigo-500 uppercase mt-1">INICIA: ${c.fechaInicio} | TERMINA: ${c.fechaTermino || 'N/A'}</p>` : ''}
                         ${c.fechasInactivas && JSON.parse(c.fechasInactivas).length > 0 ? 
                             `<p class="text-[7px] text-rose-400 font-bold uppercase mt-1">${JSON.parse(c.fechasInactivas).length} fechas sin clase registradas</p>` : ''}
                     </div>
@@ -387,6 +393,37 @@
 
         window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
 
+        // --- NUEVA LÓGICA DE CÁLCULO DE FECHAS ---
+        window.calcularFechaTermino = () => {
+            const fechaInicioStr = document.getElementById('fecha-inicio-curso').value;
+            const duracion = parseInt(document.getElementById('duracion-curso').value);
+            const fechasInactivasJson = document.getElementById('fechas-inactivas-json').value;
+            const fechasInactivas = fechasInactivasJson ? JSON.parse(fechasInactivasJson) : [];
+
+            if (!fechaInicioStr || isNaN(duracion) || duracion <= 0) {
+                document.getElementById('fecha-termino-curso').value = '';
+                return;
+            }
+
+            let fechaActual = new Date(fechaInicioStr + "T00:00:00");
+            let sesionesContadas = 1; // La primera sesión es el día de inicio marcado
+
+            // Saltarse la fecha inicial si por error se marca como inactiva
+            while (fechasInactivas.includes(fechaActual.toISOString().split('T')[0])) {
+                fechaActual.setDate(fechaActual.getDate() + 7);
+            }
+
+            while (sesionesContadas < duracion) {
+                fechaActual.setDate(fechaActual.getDate() + 7);
+                let strFecha = fechaActual.toISOString().split('T')[0];
+                if (!fechasInactivas.includes(strFecha)) {
+                    sesionesContadas++;
+                }
+            }
+
+            document.getElementById('fecha-termino-curso').value = fechaActual.toISOString().split('T')[0];
+        };
+
         // --- FORM HANDLING ---
         window.agregarFechaSinClase = () => {
             const fInput = document.getElementById('fecha-sin-clase');
@@ -398,6 +435,7 @@
                 fechas.push(fInput.value);
                 listaJson.value = JSON.stringify(fechas);
                 actualizarListaVisualInactivas(fechas);
+                window.calcularFechaTermino(); // Recalcular al agregar fecha libre
             }
             fInput.value = "";
         };
@@ -408,6 +446,7 @@
             fechas = fechas.filter(x => x !== f);
             listaJson.value = JSON.stringify(fechas);
             actualizarListaVisualInactivas(fechas);
+            window.calcularFechaTermino(); // Recalcular al quitar fecha libre
         };
 
         function actualizarListaVisualInactivas(fechas) {
@@ -487,6 +526,10 @@
             document.getElementById('duracion-curso').value = c.duracion;
             document.getElementById('costo-clase').value = c.costo;
             
+            // Cargar nuevas fechas
+            document.getElementById('fecha-inicio-curso').value = c.fechaInicio || '';
+            document.getElementById('fecha-termino-curso').value = c.fechaTermino || '';
+            
             const fechas = c.fechasInactivas ? JSON.parse(c.fechasInactivas) : [];
             document.getElementById('fechas-inactivas-json').value = JSON.stringify(fechas);
             actualizarListaVisualInactivas(fechas);
@@ -521,6 +564,7 @@
             cancelarEdicionAlum();
         };
 
+        // LÓGICA COMPLETADA DEL FORMULARIO DE CURSOS (Aquí se cortó tu mensaje)
         document.getElementById('curso-form').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-id-curso').value;
@@ -528,47 +572,44 @@
                 nombre: document.getElementById('nombre-curso').value.trim(),
                 duracion: parseInt(document.getElementById('duracion-curso').value),
                 costo: parseFloat(document.getElementById('costo-clase').value),
-                fechasInactivas: document.getElementById('fechas-inactivas-json').value
+                fechasInactivas: document.getElementById('fechas-inactivas-json').value,
+                fechaInicio: document.getElementById('fecha-inicio-curso').value, // Se guarda inicio
+                fechaTermino: document.getElementById('fecha-termino-curso').value // Se guarda término calculado
             };
             id ? await updateDoc(doc(db, "cursos", id), data) : await addDoc(collection(db, "cursos"), data);
             cancelarEdicionCurso();
         };
 
+        // LÓGICA COMPLETADA DEL FORMULARIO DE FINANZAS
         document.getElementById('finance-form').onsubmit = async (e) => {
             e.preventDefault();
-            const cat = document.getElementById('categoria').value;
+            const tipoCategoria = document.getElementById('categoria').value;
+            const tipo = tipoCategoria.startsWith('ingreso') ? 'ingreso' : 'egreso';
+            
             const data = {
-                categoria: cat,
-                tipo: cat.startsWith('ingreso') ? 'ingreso' : 'egreso',
+                categoria: tipoCategoria,
+                tipo: tipo,
+                descripcion: document.getElementById('descripcion').value.trim() || document.getElementById('categoria').options[document.getElementById('categoria').selectedIndex].text,
                 monto: parseFloat(document.getElementById('monto').value),
                 fechaPago: document.getElementById('fecha-pago-real').value,
-                timestamp: Date.now(),
-                soloHistorial: document.getElementById('solo-historial').checked
+                soloHistorial: document.getElementById('solo-historial').checked,
+                timestamp: new Date().toISOString()
             };
-            if(cat === 'ingreso-clase') {
+
+            if(tipoCategoria === 'ingreso-clase') {
                 data.alumno = document.getElementById('select-alumno').value;
-                data.numSesion = document.getElementById('num-sesion').value;
+                data.numSesion = parseInt(document.getElementById('num-sesion').value);
                 data.fechaClase = document.getElementById('fecha-clase-corresponde').value;
-                data.descripcion = `PAGO SESIÓN ${data.numSesion}: ${data.alumno}`;
-            } else {
-                data.descripcion = document.getElementById('descripcion').value || cat.toUpperCase();
             }
+
             await addDoc(collection(db, "transacciones"), data);
             document.getElementById('finance-form').reset();
-            resetFechas();
-            toggleFields();
+            document.getElementById('solo-historial').checked = false;
+            autoSugerirSesionYFecha();
         };
 
-        function resetFechas() {
-            const hoyStr = new Date().toISOString().split('T')[0];
-            document.getElementById('fecha-pago-real').value = hoyStr;
-            document.getElementById('fecha-inicio-alumno').value = hoyStr;
-        }
-
-        // Initialize default dates
-        window.onload = () => {
-            resetFechas();
-        };
+        // Set default date for new transactions
+        document.getElementById('fecha-pago-real').valueAsDate = new Date();
 
     </script>
 </body>
