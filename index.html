@@ -19,7 +19,6 @@
         input:checked + .slider { background-color: #6366f1; }
         input:checked + .slider:before { transform: translateX(20px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .clickable-card:active { transform: scale(0.98); background-color: #f8fafc; }
         .festivo-chip { background: #fee2e2; color: #ef4444; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #fecaca; }
     </style>
 </head>
@@ -340,22 +339,29 @@
             document.getElementById('termino-proyectado').innerText = fecha.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
         };
 
+        // --- CORE FIX: EXPLICIT GLOBAL BINDING FOR EDITING ---
         window.editarCurso = (id) => {
             const c = cursos.find(x => x.id === id);
             if (!c) return;
+            
+            // Populate form
             document.getElementById('edit-id').value = id;
             document.getElementById('nombre-curso').value = c.nombre;
             document.getElementById('duracion-curso').value = c.duracion;
             document.getElementById('costo-clase').value = c.costo;
             document.getElementById('inicio-curso').value = c.inicio;
             
-            // Cargar festivos existentes al array
+            // Load Holidays
             arrayFestivos = c.festivos ? c.festivos.split(',').filter(f => f.trim() !== "") : [];
             renderFestivosChips();
             
+            // Update UI state
             document.getElementById('btn-save-curso').innerText = "Actualizar Diplomado";
             document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            
             actualizarTerminoProyectado();
+            
+            // Scroll to top of section
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -529,8 +535,11 @@
                 festivos: document.getElementById('festivos-curso-hidden').value,
                 timestamp: serverTimestamp()
             };
-            if (id) await updateDoc(doc(db, "cursos", id), data);
-            else await addDoc(collection(db, "cursos"), data);
+            if (id) {
+                await updateDoc(doc(db, "cursos", id), data);
+            } else {
+                await addDoc(collection(db, "cursos"), data);
+            }
             resetCursoForm();
         };
 
