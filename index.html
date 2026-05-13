@@ -90,6 +90,7 @@
                             <option value="ingreso-material">Venta de Material</option>
                             <option value="ingreso-consulta">Consulta Médica</option>
                             <option value="ingreso-renta-local">Renta de Consultorio</option>
+                            <option value="ingreso-otros">Otros Ingresos / Ajuste</option>
                         </optgroup>
                         <optgroup label="➖ EGRESOS">
                             <option value="egreso-renta">Pago de Renta</option>
@@ -455,10 +456,12 @@
                     }
                 }
 
+                const catLabel = t.categoria === 'ingreso-otros' ? 'AJUSTE' : t.categoria.split('-')[1].toUpperCase();
+
                 return `
                     <div class="bg-white p-3 rounded-2xl border border-slate-100 flex justify-between items-center ${esHis ? 'opacity-40' : ''}">
                         <div>
-                            <p class="text-[9px] font-black uppercase text-indigo-900">${t.alumno || t.categoria.split('-')[1].toUpperCase()} <span class="text-[7px] text-slate-400">(${t.metodoPago || 'EF'})</span></p>
+                            <p class="text-[9px] font-black uppercase text-indigo-900">${t.alumno || catLabel} <span class="text-[7px] text-slate-400">(${t.metodoPago === 'efectivo' ? 'EF' : 'BK'})</span></p>
                             <p class="text-[7px] font-bold text-slate-400 uppercase">${t.fechaClase || t.fechaPago}</p>
                         </div>
                         <div class="flex items-center gap-2">
@@ -474,7 +477,7 @@
             document.getElementById('balance-banco').innerText = `$${balBa}`;
             document.getElementById('balance-renta').innerText = `$${balRenta}`;
             
-            // Simulación visual de barra de progreso (asumiendo meta de renta ejemplo 10,000 o dinámica)
+            // Simulación visual de barra de progreso
             let metaRenta = 10000; 
             let pct = Math.min(100, (balRenta / metaRenta) * 100);
             document.getElementById('progreso-renta-bar').style.width = `${pct}%`;
