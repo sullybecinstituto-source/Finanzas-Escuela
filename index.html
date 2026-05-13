@@ -11,20 +11,26 @@
         :root { --primary-color: #6366f1; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         .tab-active { color: var(--primary-color); font-weight: 800; border-bottom: 3px solid var(--primary-color); }
-        .balance-card { background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); }
+        .balance-card { 
+            background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); 
+            color: white;
+        }
         .sticky-header { position: sticky; top: 0; z-index: 40; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; }
-        input, select { outline: none !important; }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #6366f1; }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900 pb-10">
 
-    <!-- Header Fijo -->
     <div class="sticky-header px-4 py-3">
         <div class="flex justify-between items-center max-w-4xl mx-auto">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">SB</div>
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg">SB</div>
                 <div>
                     <h1 class="text-base font-extrabold text-indigo-950 leading-none">Sully Bec</h1>
                     <p class="text-[8px] font-bold text-rose-400 uppercase tracking-widest mt-0.5">Control Académico</p>
@@ -38,39 +44,36 @@
     </div>
 
     <div class="max-w-4xl mx-auto px-4 pt-4">
-        <!-- Saldo Real en Caja -->
-        <div class="balance-card p-6 rounded-[2rem] text-white mb-4 shadow-xl relative overflow-hidden">
+        <div class="balance-card p-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden mb-4">
             <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-            <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest">Saldo Total en Caja</p>
+            <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest">Saldo Real en Caja</p>
             <h2 id="total-balance" class="text-4xl font-black mt-1">$0</h2>
             <div class="flex gap-6 mt-6">
-                <div class="bg-white/10 p-3 rounded-2xl flex-1">
+                <div class="bg-white/10 p-3 rounded-2xl flex-1 border border-white/5">
                     <p class="text-[8px] font-bold uppercase opacity-60 mb-1">Ingresos Totales</p>
                     <p id="total-ingresos" class="text-lg font-black text-emerald-300">$0</p>
                 </div>
-                <div class="bg-white/10 p-3 rounded-2xl flex-1">
+                <div class="bg-white/10 p-3 rounded-2xl flex-1 border border-white/5">
                     <p class="text-[8px] font-bold uppercase opacity-60 mb-1">Egresos Totales</p>
                     <p id="total-egresos" class="text-lg font-black text-rose-300">$0</p>
                 </div>
             </div>
         </div>
 
-        <!-- Ciclo de Renta (Día 15) -->
         <div class="bg-white border-2 border-indigo-100 p-5 rounded-[2rem] mb-6 shadow-sm">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h3 class="text-[10px] font-black text-indigo-900 uppercase tracking-tighter">Ciclo de Renta (15 al 14)</h3>
+                    <h3 class="text-[10px] font-black text-indigo-900 uppercase">Ciclo de Renta (Día 15)</h3>
                     <p id="rango-corte" class="text-[9px] font-bold text-slate-500 bg-indigo-50 px-2 py-0.5 rounded-full inline-block mt-1">Calculando...</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[8px] font-bold text-slate-400 uppercase">Disponible en este periodo</p>
+                    <p class="text-[8px] font-bold text-slate-400 uppercase">Disponible este mes</p>
                     <p id="period-balance" class="text-xl font-black text-indigo-600">$0</p>
                 </div>
             </div>
             <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                 <div id="period-progress" class="bg-indigo-500 h-full transition-all duration-1000" style="width: 0%"></div>
             </div>
-            <p class="text-[7px] text-slate-400 mt-2 uppercase font-bold">* Solo incluye movimientos con fecha dentro del rango arriba indicado.</p>
         </div>
 
         <!-- Navegación -->
@@ -91,9 +94,8 @@
                             <option value="ingreso-consulta">Consulta Médica/Terapias</option>
                             <option value="ingreso-renta-local">Renta de Consultorio</option>
                             <option value="ingreso-otro">Otros Ingresos</option>
-                            <option value="ingreso-historico">📜 Carga Histórica (No afecta caja)</option>
                         </optgroup>
-                        <optgroup label="➖ EGRESOS (GASTOS)">
+                        <optgroup label="➖ EGRESOS">
                             <option value="egreso-renta">Pago de Renta</option>
                             <option value="egreso-luz">Pago de Luz</option>
                             <option value="egreso-internet">Pago de Internet</option>
@@ -101,7 +103,7 @@
                             <option value="egreso-otros">Otros Egresos</option>
                         </optgroup>
                         <optgroup label="⚙️ SISTEMA">
-                            <option value="ajuste-saldo">🔄 Ajuste / Saldo Inicial (Caja Real)</option>
+                            <option value="ajuste-saldo">🔄 Ajuste / Saldo Inicial</option>
                         </optgroup>
                     </select>
 
@@ -109,6 +111,15 @@
                         <select id="select-alumno" class="w-full bg-white border-none rounded-lg p-3 text-sm font-bold shadow-sm">
                             <option value="">Seleccionar Alumno...</option>
                         </select>
+                        
+                        <div class="flex items-center justify-between bg-white/50 p-2 rounded-xl px-3 border border-indigo-100/50">
+                            <span class="text-[9px] font-black text-indigo-900 uppercase">¿Carga Histórica? (No afecta caja)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="check-historico">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-3">
                             <input type="number" id="num-sesion" placeholder="N° Sesión" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold">
                             <input type="date" id="fecha-pago-real" class="w-full bg-white border-none rounded-lg p-3 text-xs font-bold">
@@ -124,19 +135,10 @@
                 </form>
             </div>
 
-            <div class="flex justify-between items-center px-2">
-                <h3 class="text-[10px] font-black uppercase text-slate-400">Últimos movimientos</h3>
-                <p class="text-[8px] font-bold text-rose-400">Pulsa la (X) para borrar errores</p>
-            </div>
             <div id="lista-transacciones" class="space-y-2"></div>
-
-            <div class="pt-4 border-t border-slate-100">
-                <button onclick="switchTab('cursos')" class="w-full py-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center">
-                    Configuración avanzada y Limpieza en pestaña 'Diplomados' ⚙️
-                </button>
-            </div>
         </section>
 
+        <!-- Secciones Alumnos y Cursos... -->
         <section id="sec-gestion" class="hidden space-y-6">
             <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
                 <form id="alumno-form" class="space-y-3">
@@ -152,67 +154,51 @@
         </section>
 
         <section id="sec-cursos" class="hidden space-y-6">
+            <div class="bg-white border-2 border-slate-900 rounded-[2rem] p-6 shadow-sm">
+                <form id="curso-form" class="space-y-3">
+                    <input type="text" id="nombre-curso" placeholder="Nombre Diplomado" required class="w-full bg-slate-50 rounded-xl p-3 text-sm font-bold">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" id="duracion-curso" placeholder="Sesiones" required class="w-full bg-slate-50 rounded-xl p-3 text-sm font-bold">
+                        <input type="number" id="costo-clase" placeholder="Costo Sesión $" required class="w-full bg-slate-50 rounded-xl p-3 text-sm font-bold">
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase">Guardar Nuevo Curso</button>
+                </form>
+            </div>
             <div id="ui-cursos" class="space-y-3"></div>
             
-            <div class="bg-slate-900 p-8 rounded-[2rem] text-white space-y-4">
-                <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Respaldo y Limpieza</h3>
+            <div class="bg-slate-900 p-6 rounded-[2rem] text-white">
+                <h3 class="text-[10px] font-black uppercase text-slate-400 mb-4">Mantenimiento</h3>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="exportarExcel()" class="bg-indigo-600 py-3 rounded-xl font-black text-[10px] uppercase">Exportar Todo</button>
-                    <label class="bg-amber-600 py-3 rounded-xl font-black text-[10px] uppercase text-center cursor-pointer">Importar<input type="file" class="hidden" onchange="importarExcel(event)"></label>
+                    <button onclick="exportarExcel()" class="bg-white/10 py-3 rounded-xl font-black text-[10px] uppercase">Exportar Todo</button>
+                    <label class="bg-white/10 py-3 rounded-xl font-black text-[10px] uppercase text-center cursor-pointer">Importar<input type="file" class="hidden" onchange="importarExcel(event)"></label>
                 </div>
-                <button onclick="limpiarTodoElHistorial()" class="w-full bg-rose-600 border border-rose-500 text-white py-4 rounded-2xl font-black text-[10px] uppercase mt-4 shadow-lg shadow-rose-900/20">🔥 Borrar TODO el historial (Reiniciar Caja a $0)</button>
-                <p class="text-[7px] text-slate-500 text-center uppercase font-bold">Usa esto solo si quieres empezar de cero absoluto.</p>
+                <button onclick="limpiarTodoElHistorial()" class="w-full bg-rose-600/20 border border-rose-500/30 text-rose-300 py-3 rounded-xl font-black text-[10px] uppercase mt-4">🔥 Borrar TODO el historial</button>
             </div>
         </section>
     </div>
 
-    <div id="modal-historial" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] hidden flex items-end sm:items-center justify-center">
-        <div class="bg-slate-50 w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] h-[90vh] overflow-hidden flex flex-col">
-            <div class="p-8 bg-indigo-600 text-white flex justify-between items-start">
+    <!-- Modales -->
+    <div id="modal-historial" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-end sm:items-center justify-center">
+        <div class="bg-slate-50 w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[2.5rem] h-[85vh] flex flex-col overflow-hidden">
+            <div class="p-6 bg-indigo-600 text-white flex justify-between items-center">
                 <div>
-                    <h2 id="modal-nombre" class="text-2xl font-black uppercase leading-tight">Nombre Alumno</h2>
-                    <p id="modal-curp" class="text-[9px] font-bold mt-1 opacity-80 uppercase"></p>
+                    <h2 id="modal-nombre" class="text-xl font-black uppercase">Nombre</h2>
+                    <p id="modal-curp" class="text-[8px] font-bold opacity-80"></p>
                 </div>
-                <button onclick="cerrarModal()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold">&times;</button>
+                <button onclick="cerrarModal()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">&times;</button>
             </div>
-            <div id="modal-content" class="flex-1 overflow-y-auto p-6 space-y-3 custom-scroll bg-white"></div>
-        </div>
-    </div>
-
-    <!-- Modal Gestión de Diplomado -->
-    <div id="modal-curso" class="fixed inset-0 bg-white z-[110] hidden flex flex-col">
-        <div class="p-6 bg-slate-900 text-white flex justify-between items-center">
-            <h2 id="mc-titulo" class="text-xl font-black uppercase">Configurar Diplomado</h2>
-            <button onclick="cerrarModalCurso()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">&times;</button>
-        </div>
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-            <div class="grid grid-cols-2 gap-4">
-                <input type="text" id="edit-c-nombre" placeholder="Nombre" class="bg-slate-100 p-3 rounded-xl text-sm font-bold">
-                <input type="date" id="edit-c-inicio" class="bg-slate-100 p-3 rounded-xl text-sm font-bold" onchange="recalcularTermino()">
-                <input type="number" id="edit-c-sesiones" placeholder="Sesiones" class="bg-slate-100 p-3 rounded-xl text-sm font-bold" onchange="recalcularTermino()">
-                <input type="number" id="edit-c-costo" placeholder="Costo" class="bg-slate-100 p-3 rounded-xl text-sm font-bold">
+            <div id="deuda-summary" class="bg-white p-6 grid grid-cols-3 gap-2 border-b border-slate-100 text-center">
+                <div><p class="text-[8px] font-black text-slate-400 uppercase">Clases Hoy</p><p id="calc-clases-total" class="text-lg font-black">0</p></div>
+                <div><p class="text-[8px] font-black text-slate-400 uppercase">Pagadas</p><p id="calc-clases-pagadas" class="text-lg font-black text-emerald-600">0</p></div>
+                <div class="bg-rose-50 rounded-xl py-1"><p class="text-[8px] font-black text-rose-400 uppercase">Debe</p><p id="calc-clases-debe" class="text-lg font-black text-rose-600">0</p></div>
             </div>
-            <div class="bg-rose-50 p-5 rounded-3xl border border-rose-100">
-                <p class="text-[10px] font-black text-rose-900 uppercase mb-3 tracking-widest">Días de Suspensión (No hay clase)</p>
-                <div class="flex gap-2 mb-4">
-                    <input type="date" id="new-c-feriado" class="flex-1 bg-white p-3 rounded-xl text-sm font-bold border border-rose-200">
-                    <button onclick="agregarFeriadoCurso()" class="bg-rose-600 text-white px-6 rounded-xl font-black text-[10px] uppercase">Añadir</button>
-                </div>
-                <div id="mc-feriados-lista" class="flex flex-wrap gap-2"></div>
-            </div>
-            <div class="bg-indigo-600 p-6 rounded-3xl text-white flex justify-between items-center">
-                <div>
-                    <p class="text-[10px] font-bold opacity-70 uppercase">Fecha de Término</p>
-                    <p id="mc-fecha-fin" class="text-xl font-black">---</p>
-                </div>
-                <button onclick="guardarCambiosCurso()" class="bg-white text-indigo-600 px-6 py-2 rounded-xl font-black uppercase text-[10px]">Guardar</button>
-            </div>
+            <div id="modal-content" class="flex-1 overflow-y-auto p-4 space-y-2 bg-white"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, getDocs, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCcAda5-ewiR78bfLyYrjEMhfdc0RFxd7s",
@@ -227,7 +213,17 @@
         const db = getFirestore(app);
         
         let transacciones = [], alumnos = [], cursos = [];
-        let cursoActualEdit = null;
+
+        window.switchTab = (t) => {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`sec-${t}`).classList.remove('hidden');
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('tab-active');
+                b.classList.add('text-slate-400');
+            });
+            document.getElementById(`btn-${t}`).classList.add('tab-active');
+            document.getElementById(`btn-${t}`).classList.remove('text-slate-400');
+        };
 
         onSnapshot(query(collection(db, "transacciones"), orderBy("timestamp", "desc")), (snap) => {
             transacciones = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -246,74 +242,55 @@
             populateSelects();
         });
 
-        window.renderFinanzas = () => {
+        function renderFinanzas() {
             const ui = document.getElementById('lista-transacciones');
-            let ingT = 0, egrT = 0, ingP = 0, egrP = 0;
+            let ingT = 0, egrT = 0, periodBal = 0;
 
             const hoy = new Date();
-            let iniCorte, finCorte;
+            const diaCorte = 15;
+            let inicioPeriodo, finPeriodo;
 
-            if (hoy.getDate() >= 15) {
-                // Estamos después del 15: el ciclo empezó el 15 de este mes
-                iniCorte = new Date(hoy.getFullYear(), hoy.getMonth(), 15, 0, 0, 0);
-                finCorte = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 14, 23, 59, 59);
+            if (hoy.getDate() < diaCorte) {
+                inicioPeriodo = new Date(hoy.getFullYear(), hoy.getMonth() - 1, diaCorte);
+                finPeriodo = new Date(hoy.getFullYear(), hoy.getMonth(), diaCorte - 1);
             } else {
-                // Estamos antes del 15: el ciclo empezó el 15 del mes pasado
-                iniCorte = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 15, 0, 0, 0);
-                finCorte = new Date(hoy.getFullYear(), hoy.getMonth(), 14, 23, 59, 59);
+                inicioPeriodo = new Date(hoy.getFullYear(), hoy.getMonth(), diaCorte);
+                finPeriodo = new Date(hoy.getFullYear(), hoy.getMonth() + 1, diaCorte - 1);
             }
 
-            document.getElementById('rango-corte').innerText = `Del ${iniCorte.toLocaleDateString()} al ${finCorte.toLocaleDateString()}`;
+            document.getElementById('rango-corte').innerText = `${inicioPeriodo.toLocaleDateString()} al ${finPeriodo.toLocaleDateString()}`;
+            
+            const transMes = transacciones.filter(t => {
+                const f = new Date(t.fechaPago + "T12:00:00");
+                return f >= inicioPeriodo && f <= finPeriodo;
+            });
 
-            ui.innerHTML = transacciones.slice(0,25).map(t => {
-                const monto = Number(t.monto);
-                const esIng = t.categoria.startsWith('ingreso') || t.categoria === 'ajuste-saldo';
-                const esHistorico = t.categoria === 'ingreso-historico';
-                
-                // Mapeo de nombres de categoría para mostrar en la lista
-                const nombresCat = {
-                    'ingreso-clase': 'PAGO CLASE',
-                    'ingreso-taller': 'TALLER',
-                    'ingreso-material': 'MATERIAL',
-                    'ingreso-consulta': 'CONSULTA',
-                    'ingreso-renta-local': 'RENTA CONSULTORIO',
-                    'ingreso-otro': 'OTRO INGRESO',
-                    'ingreso-historico': 'CARGA HISTÓRICA',
-                    'egreso-renta': 'GASTO: RENTA',
-                    'egreso-luz': 'GASTO: LUZ',
-                    'egreso-internet': 'GASTO: INTERNET',
-                    'egreso-profesores': 'PAGO PROFESOR',
-                    'egreso-otros': 'OTROS GASTOS',
-                    'ajuste-saldo': 'AJUSTE DE CAJA'
-                };
+            ui.innerHTML = transacciones.slice(0, 15).map(t => {
+                const esIng = t.categoria.startsWith('ingreso') && t.categoria !== 'ingreso-historico';
+                const esHis = t.categoria === 'ingreso-historico';
+                const m = Number(t.monto);
 
-                const fechaT = new Date(t.fechaPago + "T12:00:00");
+                if (esIng) ingT += m;
+                if (t.categoria.startsWith('egreso')) egrT += m;
+                if (t.categoria === 'ajuste-saldo') ingT += m;
 
-                if (!esHistorico) {
-                    if (t.categoria === 'ajuste-saldo') {
-                        ingT += monto; 
-                    } else {
-                        if (esIng) ingT += monto; else egrT += monto;
-                    }
-
-                    if (fechaT >= iniCorte && fechaT <= finCorte) {
-                        if (t.categoria === 'ajuste-saldo') ingP += monto;
-                        else if (esIng) ingP += monto; else egrP += monto;
-                    }
+                const f = new Date(t.fechaPago + "T12:00:00");
+                if (f >= inicioPeriodo && f <= finPeriodo) {
+                    if (esIng || t.categoria === 'ajuste-saldo') periodBal += m;
+                    if (t.categoria.startsWith('egreso')) periodBal -= m;
                 }
 
                 return `
-                    <div class="bg-white p-3 rounded-xl border border-slate-100 flex justify-between items-center group ${esHistorico ? 'opacity-60' : ''}">
-                        <div class="flex items-center gap-3">
-                            <div class="w-1.5 h-1.5 rounded-full ${esHistorico ? 'bg-slate-400' : (t.categoria === 'ajuste-saldo' ? 'bg-indigo-400' : (esIng ? 'bg-emerald-400' : 'bg-rose-400'))}"></div>
-                            <div>
-                                <p class="text-[9px] font-black uppercase text-indigo-950">${nombresCat[t.categoria] || 'MOVIMIENTO'}</p>
-                                <p class="text-[8px] font-bold text-slate-500 uppercase">${t.alumno || t.descripcion || 'Sin detalle'}</p>
-                            </div>
+                    <div class="bg-white p-3 rounded-2xl border border-slate-100 flex justify-between items-center ${esHis ? 'opacity-40' : ''}">
+                        <div>
+                            <p class="text-[9px] font-black uppercase text-indigo-900">${t.alumno ? t.alumno : t.categoria.split('-')[1]}</p>
+                            <p class="text-[7px] font-bold text-slate-400 uppercase">${t.fechaPago} ${t.descripcion ? '• ' + t.descripcion : ''}</p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <p class="font-black text-xs ${esHistorico ? 'text-slate-400' : (t.categoria === 'ajuste-saldo' ? 'text-indigo-600' : (esIng ? 'text-emerald-500' : 'text-rose-500'))}">${esIng ? '+' : '-'}$${monto}</p>
-                            <button onclick="borrarMovimiento('${t.id}')" class="text-rose-300 hover:text-rose-600 font-bold px-2">&times;</button>
+                            <p class="font-black text-xs ${esHis ? 'text-slate-400' : (esIng || t.categoria === 'ajuste-saldo' ? 'text-emerald-500' : 'text-rose-500')}">
+                                ${esHis ? '' : (esIng || t.categoria === 'ajuste-saldo' ? '+' : '-')}$${m}
+                            </p>
+                            <button onclick="borrarTransaccion('${t.id}')" class="text-rose-300 hover:text-rose-600 font-bold px-2">×</button>
                         </div>
                     </div>
                 `;
@@ -322,165 +299,99 @@
             document.getElementById('total-ingresos').innerText = `$${ingT}`;
             document.getElementById('total-egresos').innerText = `$${egrT}`;
             document.getElementById('total-balance').innerText = `$${ingT - egrT}`;
-            document.getElementById('period-balance').innerText = `$${ingP - egrP}`;
+            document.getElementById('period-balance').innerText = `$${periodBal}`;
 
-            const progreso = ((hoy - iniCorte) / (finCorte - iniCorte)) * 100;
-            document.getElementById('period-progress').style.width = `${Math.min(100, Math.max(0, progreso))}%`;
-        };
-
-        window.borrarMovimiento = async (id) => {
-            if(confirm('¿Eliminar este registro de pago?')) {
-                await deleteDoc(doc(db, "transacciones", id));
-            }
-        };
-
-        window.limpiarTodoElHistorial = async () => {
-            if(confirm('ATENCIÓN: Se borrarán TODOS los pagos registrados para reiniciar la caja a $0. ¿Estás seguro?')) {
-                const snap = await getDocs(collection(db, "transacciones"));
-                const promesas = snap.docs.map(d => deleteDoc(doc(db, "transacciones", d.id)));
-                await Promise.all(promesas);
-                alert('Historial limpiado con éxito.');
-            }
-        };
-
-        window.switchTab = (t) => {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`sec-${t}`).classList.remove('hidden');
-            document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('tab-active');
-                b.classList.add('text-slate-400');
-            });
-            document.getElementById(`btn-${t}`).classList.add('tab-active');
-            document.getElementById(`btn-${t}`).classList.remove('text-slate-400');
-        };
-
-        window.renderAlumnos = () => {
-            document.getElementById('ui-alumnos').innerHTML = alumnos.map(a => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
-                    <div>
-                        <h4 class="font-black text-sm text-indigo-950 uppercase">${a.nombre}</h4>
-                        <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">${a.curp || 'No CURP'}</p>
-                    </div>
-                    <button onclick="abrirHistorial('${a.nombre}')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Estado</button>
-                </div>
-            `).join('');
-        };
-
-        window.renderCursos = () => {
-            document.getElementById('ui-cursos').innerHTML = cursos.map(c => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-between items-center">
-                    <div>
-                        <h4 class="font-black text-sm uppercase">${c.nombre}</h4>
-                        <p class="text-[8px] font-bold text-indigo-500 uppercase">${c.duracion} Sesiones • $${c.costo}</p>
-                    </div>
-                    <button onclick="abrirGestionCurso('${c.id}')" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Gestionar</button>
-                </div>
-            `).join('');
-        };
-
-        window.abrirGestionCurso = (id) => {
-            cursoActualEdit = cursos.find(c => c.id === id);
-            document.getElementById('edit-c-nombre').value = cursoActualEdit.nombre;
-            document.getElementById('edit-c-inicio').value = cursoActualEdit.fechaInicio || '';
-            document.getElementById('edit-c-sesiones').value = cursoActualEdit.duracion || 0;
-            document.getElementById('edit-c-costo').value = cursoActualEdit.costo || 0;
-            renderFeriadosCurso();
-            recalcularTermino();
-            document.getElementById('modal-curso').classList.remove('hidden');
-        };
-
-        window.cerrarModalCurso = () => document.getElementById('modal-curso').classList.add('hidden');
-
-        window.recalcularTermino = () => {
-            const inicio = document.getElementById('edit-c-inicio').value;
-            const sesiones = Number(document.getElementById('edit-c-sesiones').value);
-            const feriados = cursoActualEdit ? (cursoActualEdit.feriados || []) : [];
-            
-            if(!inicio || !sesiones) {
-                document.getElementById('mc-fecha-fin').innerText = "---";
-                return;
-            }
-
-            let fecha = new Date(inicio + "T12:00:00");
-            let cont = 0;
-            while(cont < sesiones) {
-                if(!feriados.includes(fecha.toISOString().split('T')[0])) cont++;
-                if(cont < sesiones) fecha.setDate(fecha.getDate() + 7);
-            }
-            document.getElementById('mc-fecha-fin').innerText = fecha.toLocaleDateString();
-        };
-
-        window.agregarFeriadoCurso = async () => {
-            const f = document.getElementById('new-c-feriado').value;
-            if(!f) return;
-            const lista = cursoActualEdit.feriados || [];
-            if(!lista.includes(f)) {
-                lista.push(f);
-                await updateDoc(doc(db, "cursos", cursoActualEdit.id), { feriados: lista });
-                recalcularTermino();
-                renderFeriadosCurso();
-            }
-        };
-
-        function renderFeriadosCurso() {
-            const list = cursoActualEdit.feriados || [];
-            document.getElementById('mc-feriados-lista').innerHTML = list.map(f => `
-                <div class="bg-white px-3 py-1 rounded-full border border-rose-200 text-rose-600 text-[9px] font-black flex items-center gap-2">
-                    ${f} <button onclick="quitarFeriado('${f}')">&times;</button>
-                </div>
-            `).join('') || '<p class="text-[8px] text-slate-300 uppercase">Sin suspensiones</p>';
+            const totalDias = (finPeriodo - inicioPeriodo) / (1000 * 60 * 60 * 24);
+            const diasPasados = (hoy - inicioPeriodo) / (1000 * 60 * 60 * 24);
+            document.getElementById('period-progress').style.width = Math.min(100, (diasPasados / totalDias) * 100) + '%';
         }
 
-        window.quitarFeriado = async (f) => {
-            const lista = cursoActualEdit.feriados.filter(x => x !== f);
-            await updateDoc(doc(db, "cursos", cursoActualEdit.id), { feriados: lista });
-            renderFeriadosCurso();
-            recalcularTermino();
-        };
-
-        window.guardarCambiosCurso = async () => {
-            await updateDoc(doc(db, "cursos", cursoActualEdit.id), {
-                nombre: document.getElementById('edit-c-nombre').value,
-                fechaInicio: document.getElementById('edit-c-inicio').value,
-                duracion: Number(document.getElementById('edit-c-sesiones').value),
-                costo: Number(document.getElementById('edit-c-costo').value)
-            });
-            cerrarModalCurso();
-        };
-
-        window.abrirHistorial = (nombre) => {
-            const alu = alumnos.find(a => a.nombre === nombre);
+        window.abrirHistorial = (nombreAlumno) => {
+            const alu = alumnos.find(a => a.nombre === nombreAlumno);
             const cur = cursos.find(c => c.nombre === alu.curso);
-            // Ahora incluimos tanto pagos de clase como cargas históricas en el modal del alumno
-            const pagos = transacciones.filter(t => t.alumno === nombre && (t.categoria === 'ingreso-clase' || t.categoria === 'ingreso-historico'));
-            
-            document.getElementById('modal-nombre').innerText = nombre;
-            document.getElementById('modal-curp').innerText = alu.curp || 'Sin CURP';
-            
-            const cont = document.getElementById('modal-content');
-            cont.innerHTML = pagos.map(p => `
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
+            const pagos = transacciones.filter(t => t.alumno === nombreAlumno && (t.categoria === 'ingreso-clase' || t.categoria === 'ingreso-historico'));
+
+            document.getElementById('modal-nombre').innerText = alu.nombre;
+            document.getElementById('modal-curp').innerText = alu.curp || 'SIN CURP REGISTRADO';
+
+            let clasesTotal = 0;
+            if (cur && cur.inicio) {
+                const start = new Date(cur.inicio + "T00:00:00");
+                const hoy = new Date();
+                let temp = new Date(start);
+                const susp = cur.feriados || [];
+
+                while (temp <= hoy) {
+                    const iso = temp.toISOString().split('T')[0];
+                    if (!susp.includes(iso)) clasesTotal++;
+                    temp.setDate(temp.getDate() + 7);
+                }
+            }
+
+            const pagadas = pagos.length;
+            document.getElementById('calc-clases-total').innerText = clasesTotal;
+            document.getElementById('calc-clases-pagadas').innerText = pagadas;
+            document.getElementById('calc-clases-debe').innerText = Math.max(0, clasesTotal - pagadas);
+
+            document.getElementById('modal-content').innerHTML = pagos.map(p => `
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex justify-between items-center">
                     <div>
-                        <p class="text-[9px] font-black uppercase text-indigo-900">Sesión ${p.numSesion || '?'}</p>
-                        <p class="text-[7px] font-bold text-slate-400 uppercase">${p.fechaPago}</p>
+                        <p class="text-[9px] font-black uppercase">Sesión ${p.numSesion || '?'}</p>
+                        <p class="text-[7px] font-bold text-slate-400">${p.fechaPago} ${p.categoria === 'ingreso-historico' ? '• CARGA HISTÓRICA' : ''}</p>
                     </div>
-                    <p class="text-sm font-black text-emerald-600">$${p.monto}</p>
+                    <p class="text-xs font-black text-indigo-600">$${p.monto}</p>
                 </div>
-            `).join('') || '<p class="text-center py-10 text-slate-300 font-bold uppercase text-[10px]">Sin pagos registrados</p>';
-            
+            `).join('') || '<p class="text-center py-10 text-[10px] font-bold text-slate-300">SIN REGISTROS</p>';
+
             document.getElementById('modal-historial').classList.remove('hidden');
         };
 
         window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
 
+        function renderCursos() {
+            document.getElementById('ui-cursos').innerHTML = cursos.map(c => {
+                let fin = "Definir Inicio";
+                if (c.inicio && c.duracion) {
+                    let d = new Date(c.inicio + "T00:00:00");
+                    let count = 0;
+                    const susp = c.feriados || [];
+                    while (count < c.duracion - 1) {
+                        d.setDate(d.getDate() + 7);
+                        if (!susp.includes(d.toISOString().split('T')[0])) count++;
+                    }
+                    fin = d.toLocaleDateString();
+                }
+                return `
+                    <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-black text-sm uppercase text-indigo-900">${c.nombre}</h4>
+                                <p class="text-[8px] font-bold text-slate-400 uppercase">${c.duracion} sesiones • $${c.costo}/clase</p>
+                            </div>
+                            <button onclick="borrarCurso('${c.id}')" class="text-rose-200">×</button>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-2xl">
+                            <div>
+                                <p class="text-[7px] font-bold text-slate-400 uppercase">Término Estimado</p>
+                                <p class="text-[10px] font-black text-indigo-600">${fin}</p>
+                            </div>
+                            <button onclick="gestionarCurso('${c.id}')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[8px] font-black uppercase">Gestionar</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         document.getElementById('finance-form').onsubmit = async (e) => {
             e.preventDefault();
             const cat = document.getElementById('categoria').value;
+            const esHis = document.getElementById('check-historico').checked;
+            
             await addDoc(collection(db, "transacciones"), {
-                categoria: cat,
-                alumno: cat === 'ingreso-clase' ? document.getElementById('select-alumno').value : '',
+                categoria: (cat === 'ingreso-clase' && esHis) ? 'ingreso-historico' : cat,
+                alumno: (cat === 'ingreso-clase') ? document.getElementById('select-alumno').value : '',
                 monto: Number(document.getElementById('monto').value),
-                numSesion: cat === 'ingreso-clase' ? document.getElementById('num-sesion').value : '',
+                numSesion: (cat === 'ingreso-clase') ? document.getElementById('num-sesion').value : '',
                 fechaPago: document.getElementById('fecha-pago-real').value || new Date().toISOString().split('T')[0],
                 descripcion: document.getElementById('descripcion').value,
                 timestamp: serverTimestamp()
@@ -489,38 +400,66 @@
             toggleFields();
         };
 
+        window.toggleFields = () => {
+            const cat = document.getElementById('categoria').value;
+            document.getElementById('fields-alumno').classList.toggle('hidden', cat !== 'ingreso-clase');
+        };
+
         document.getElementById('alumno-form').onsubmit = async (e) => {
             e.preventDefault();
             await addDoc(collection(db, "alumnos"), {
                 nombre: document.getElementById('nombre-alumno').value,
-                curp: document.getElementById('curp-alumno').value.toUpperCase(),
+                curp: document.getElementById('curp-alumno').value,
                 curso: document.getElementById('select-curso-alumno').value
             });
             e.target.reset();
         };
 
-        window.populateSelects = () => {
-            const sa = document.getElementById('select-alumno');
-            const sc = document.getElementById('select-curso-alumno');
-            if(sa) sa.innerHTML = '<option value="">Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
-            if(sc) sc.innerHTML = '<option value="">Diplomado...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+        document.getElementById('curso-form').onsubmit = async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "cursos"), {
+                nombre: document.getElementById('nombre-curso').value,
+                duracion: Number(document.getElementById('duracion-curso').value),
+                costo: Number(document.getElementById('costo-clase').value),
+                feriados: [],
+                inicio: ""
+            });
+            e.target.reset();
         };
 
-        window.toggleFields = () => {
-            const cat = document.getElementById('categoria').value;
-            // Los campos de alumno solo se muestran para Pagos de Clase y Carga Histórica
-            const requiereAlumno = (cat === 'ingreso-clase' || cat === 'ingreso-historico');
-            document.getElementById('fields-alumno').classList.toggle('hidden', !requiereAlumno);
+        function renderAlumnos() {
+            document.getElementById('ui-alumnos').innerHTML = alumnos.map(a => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
+                    <div>
+                        <p class="font-black text-sm text-indigo-950 uppercase">${a.nombre}</p>
+                        <p class="text-[7px] font-bold text-slate-400 uppercase">${a.curso} ${a.curp ? '• ' + a.curp : ''}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="abrirHistorial('${a.nombre}')" class="bg-indigo-50 text-indigo-600 px-3 py-2 rounded-xl text-[8px] font-black uppercase">Estado</button>
+                        <button onclick="borrarAlumno('${a.id}')" class="text-rose-300 text-xl font-bold">×</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateSelects() {
+            const sA = document.getElementById('select-alumno');
+            const sC = document.getElementById('select-curso-alumno');
+            if(sA) sA.innerHTML = '<option value="">Alumno...</option>' + alumnos.map(a => `<option value="${a.nombre}">${a.nombre}</option>`).join('');
+            if(sC) sC.innerHTML = '<option value="">Diplomado...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+        }
+
+        window.borrarTransaccion = async (id) => { if(confirm('¿Borrar este movimiento?')) await deleteDoc(doc(db, "transacciones", id)); };
+        window.borrarAlumno = async (id) => { if(confirm('¿Eliminar alumno?')) await deleteDoc(doc(db, "alumnos", id)); };
+        window.borrarCurso = async (id) => { if(confirm('¿Eliminar diplomado?')) await deleteDoc(doc(db, "cursos", id)); };
+        window.limpiarTodoElHistorial = async () => {
+            if(confirm('ATENCIÓN: Se borrarán TODOS los registros de pagos. ¿Continuar?')){
+                const s = await getDocs(collection(db, "transacciones"));
+                await Promise.all(s.docs.map(d => deleteDoc(doc(db, "transacciones", d.id))));
+            }
         };
 
-        window.exportarExcel = () => {
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(alumnos), "Alumnos");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transacciones), "Finanzas");
-            XLSX.writeFile(wb, "SullyBec_Respaldo.xlsx");
-        };
-
-        window.onload = toggleFields;
+        window.onload = () => { toggleFields(); };
     </script>
 </body>
 </html>
