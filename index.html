@@ -434,10 +434,56 @@
                             <p class="font-black text-sm text-indigo-950 uppercase">${a.nombre}</p>
                             <p class="text-[9px] font-black text-indigo-500 uppercase mt-1">${a.curso || 'Sin curso'}</p>
                         </div>
-                        <button onclick="window.eliminarDoc('alumnos', '${a.id}')" class="text-rose-300 text-[8px] font-bold uppercase">Borrar</button>
+                        <div class="flex flex-col gap-2 items-end">
+                            <button onclick="window.eliminarDoc('alumnos', '${a.id}')" class="text-rose-300 text-[8px] font-bold uppercase">Borrar</button>
+                            <button onclick="window.abrirHistorial('${a.nombre}')" class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase">Ver Historial</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
+        };
+
+        window.abrirHistorial = (nombreAlumno) => {
+            const modal = document.getElementById('modal-historial');
+            const titulo = document.getElementById('modal-nombre');
+            const contenido = document.getElementById('modal-content');
+            
+            titulo.innerText = `Historial: ${nombreAlumno}`;
+            contenido.innerHTML = '';
+
+            // Filtramos las transacciones que pertenezcan a este alumno
+            const historial = transacciones.filter(t => t.alumno === nombreAlumno);
+
+            if (historial.length === 0) {
+                contenido.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 opacity-30">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <p class="font-black text-[10px] uppercase">No hay pagos registrados</p>
+                    </div>`;
+            } else {
+                historial.forEach(t => {
+                    const item = document.createElement('div');
+                    item.className = "bg-white p-4 rounded-2xl border border-slate-200 flex justify-between items-center";
+                    item.innerHTML = `
+                        <div>
+                            <p class="text-[10px] font-black text-slate-800 uppercase">${t.descripcion || t.categoria}</p>
+                            <p class="text-[8px] font-bold text-slate-400 mt-1 uppercase">${t.fechaPago || 'Sin fecha'}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black text-emerald-600">$${t.monto}</p>
+                        </div>
+                    `;
+                    contenido.appendChild(item);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.cerrarModal = () => {
+            document.getElementById('modal-historial').classList.add('hidden');
         };
 
         window.renderCursos = () => {
