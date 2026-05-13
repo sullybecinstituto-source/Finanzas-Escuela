@@ -87,6 +87,7 @@
                         <option value="ingreso-clase">Pago de Clase (Alumno)</option>
                         <option value="ingreso-otro">Inscripción / Otros</option>
                         <option value="egreso-otros">Gasto / Pago Maestro</option>
+                        <option value="ajuste-saldo">🔄 Ajuste / Saldo Inicial (Caja Real)</option>
                     </select>
 
                     <div id="fields-alumno" class="bg-indigo-50/50 p-4 rounded-2xl space-y-3 border border-indigo-100">
@@ -113,6 +114,12 @@
                 <p class="text-[8px] font-bold text-rose-400">Pulsa la (X) para borrar errores</p>
             </div>
             <div id="lista-transacciones" class="space-y-2"></div>
+
+            <div class="pt-4 border-t border-slate-100">
+                <button onclick="switchTab('cursos')" class="w-full py-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center">
+                    Configuración avanzada y Limpieza en pestaña 'Diplomados' ⚙️
+                </button>
+            </div>
         </section>
 
         <section id="sec-gestion" class="hidden space-y-6">
@@ -138,8 +145,8 @@
                     <button onclick="exportarExcel()" class="bg-indigo-600 py-3 rounded-xl font-black text-[10px] uppercase">Exportar Todo</button>
                     <label class="bg-amber-600 py-3 rounded-xl font-black text-[10px] uppercase text-center cursor-pointer">Importar<input type="file" class="hidden" onchange="importarExcel(event)"></label>
                 </div>
-                <!-- BOTÓN PARA LIMPIAR EL REVOLTIJO -->
-                <button onclick="limpiarTodoElHistorial()" class="w-full bg-rose-600/20 border border-rose-600/50 text-rose-400 py-4 rounded-2xl font-black text-[10px] uppercase mt-4">🔥 Borrar todos los pagos (Resetear Caja)</button>
+                <button onclick="limpiarTodoElHistorial()" class="w-full bg-rose-600 border border-rose-500 text-white py-4 rounded-2xl font-black text-[10px] uppercase mt-4 shadow-lg shadow-rose-900/20">🔥 Borrar TODO el historial (Reiniciar Caja a $0)</button>
+                <p class="text-[7px] text-slate-500 text-center uppercase font-bold">Usa esto solo si quieres empezar de cero absoluto.</p>
             </div>
         </section>
     </div>
@@ -246,29 +253,35 @@
 
             ui.innerHTML = transacciones.slice(0,25).map(t => {
                 const monto = Number(t.monto);
-                const esIng = t.categoria.startsWith('ingreso');
+                const esIng = t.categoria.includes('ingreso') || t.categoria === 'ajuste-saldo';
+                const esEgreso = t.categoria.includes('egreso');
                 
-                // Normalizar fecha de la transacción para comparar
+                // Normalizar fecha
                 const fechaT = new Date(t.fechaPago + "T12:00:00");
 
-                if (esIng) ingT += monto; else egrT += monto;
+                if (t.categoria === 'ajuste-saldo') {
+                    ingT += monto; // El ajuste cuenta como base positiva
+                } else {
+                    if (esIng) ingT += monto; else egrT += monto;
+                }
 
-                // Verificar si cae en el periodo actual de renta
+                // Verificar periodo de renta
                 if (fechaT >= iniCorte && fechaT <= finCorte) {
-                    if (esIng) ingP += monto; else egrP += monto;
+                    if (t.categoria === 'ajuste-saldo') ingP += monto;
+                    else if (esIng) ingP += monto; else egrP += monto;
                 }
 
                 return `
                     <div class="bg-white p-3 rounded-xl border border-slate-100 flex justify-between items-center group">
                         <div class="flex items-center gap-3">
-                            <div class="w-1.5 h-1.5 rounded-full ${esIng ? 'bg-emerald-400' : 'bg-rose-400'}"></div>
+                            <div class="w-1.5 h-1.5 rounded-full ${t.categoria === 'ajuste-saldo' ? 'bg-indigo-400' : (esIng ? 'bg-emerald-400' : 'bg-rose-400')}"></div>
                             <div>
-                                <p class="text-[9px] font-black uppercase">${t.alumno || t.descripcion || 'Sin nombre'}</p>
-                                <p class="text-[7px] font-bold text-slate-400">${t.fechaPago}</p>
+                                <p class="text-[9px] font-black uppercase">${t.categoria === 'ajuste-saldo' ? '🔄 AJUSTE DE CAJA' : (t.alumno || t.descripcion || 'Sin nombre')}</p>
+                                <p class="text-[7px] font-bold text-slate-400">${t.fechaPago} ${t.descripcion ? '• ' + t.descripcion : ''}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <p class="font-black text-xs ${esIng ? 'text-emerald-500' : 'text-rose-500'}">${esIng ? '+' : '-'}$${monto}</p>
+                            <p class="font-black text-xs ${t.categoria === 'ajuste-saldo' ? 'text-indigo-600' : (esIng ? 'text-emerald-500' : 'text-rose-500')}">${esIng ? '+' : '-'}$${monto}</p>
                             <button onclick="borrarMovimiento('${t.id}')" class="text-rose-300 hover:text-rose-600 font-bold px-2">&times;</button>
                         </div>
                     </div>
@@ -435,12 +448,13 @@
                 categoria: cat,
                 alumno: cat === 'ingreso-clase' ? document.getElementById('select-alumno').value : '',
                 monto: Number(document.getElementById('monto').value),
-                numSesion: document.getElementById('num-sesion').value,
+                numSesion: cat === 'ingreso-clase' ? document.getElementById('num-sesion').value : '',
                 fechaPago: document.getElementById('fecha-pago-real').value || new Date().toISOString().split('T')[0],
                 descripcion: document.getElementById('descripcion').value,
                 timestamp: serverTimestamp()
             });
             e.target.reset();
+            toggleFields();
         };
 
         document.getElementById('alumno-form').onsubmit = async (e) => {
@@ -461,7 +475,8 @@
         };
 
         window.toggleFields = () => {
-            document.getElementById('fields-alumno').classList.toggle('hidden', document.getElementById('categoria').value !== 'ingreso-clase');
+            const cat = document.getElementById('categoria').value;
+            document.getElementById('fields-alumno').classList.toggle('hidden', cat !== 'ingreso-clase');
         };
 
         window.exportarExcel = () => {
