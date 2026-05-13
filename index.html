@@ -252,9 +252,8 @@
     </div>
 
     <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-        import { getFirestore, collection, addDoc, updateDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCcAda5-ewiR78bfLyYrjEMhfdc0RFxd7s",
@@ -271,7 +270,24 @@
         let transacciones = [], alumnos = [], cursos = [];
         let pendieteLimpieza = null;
 
-        
+        window.switchTab = (t) => {
+            // Ocultar todas las secciones
+            document.getElementById('sec-finanzas').classList.add('hidden');
+            document.getElementById('sec-gestion').classList.add('hidden');
+            document.getElementById('sec-cursos').classList.add('hidden');
+            
+            // Mostrar la seleccionada
+            document.getElementById(`sec-${t}`).classList.remove('hidden');
+            
+            // Actualizar estilo de los botones
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.add('text-slate-400'));
+            
+            const btnActivo = document.getElementById(`btn-${t}`);
+            btnActivo.classList.add('tab-active');
+            btnActivo.classList.remove('text-slate-400');
+        };
+
         window.solicitarLimpieza = (coleccion, descripcion) => {
             pendieteLimpieza = coleccion;
             document.getElementById('confirm-text').innerText = `Esta acción eliminará permanentemente ${descripcion}. No se puede deshacer.`;
