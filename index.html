@@ -84,10 +84,25 @@
             <div class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
                 <form id="finance-form" class="space-y-4">
                     <select id="categoria" onchange="toggleFields()" class="w-full bg-slate-50 border-none rounded-xl p-3 font-bold text-sm text-indigo-950 focus:ring-2 ring-indigo-200">
-                        <option value="ingreso-clase">Pago de Clase (Alumno)</option>
-                        <option value="ingreso-otro">Inscripción / Otros</option>
-                        <option value="egreso-otros">Gasto / Pago Maestro</option>
-                        <option value="ajuste-saldo">🔄 Ajuste / Saldo Inicial (Caja Real)</option>
+                        <optgroup label="➕ INGRESOS">
+                            <option value="ingreso-clase">Pago de Clase (Alumno)</option>
+                            <option value="ingreso-taller">Ingreso por Taller</option>
+                            <option value="ingreso-material">Venta de Material</option>
+                            <option value="ingreso-consulta">Consulta Médica/Terapias</option>
+                            <option value="ingreso-renta-local">Renta de Consultorio</option>
+                            <option value="ingreso-otro">Otros Ingresos</option>
+                            <option value="ingreso-historico">📜 Carga Histórica (No afecta caja)</option>
+                        </optgroup>
+                        <optgroup label="➖ EGRESOS (GASTOS)">
+                            <option value="egreso-renta">Pago de Renta</option>
+                            <option value="egreso-luz">Pago de Luz</option>
+                            <option value="egreso-internet">Pago de Internet</option>
+                            <option value="egreso-profesores">Pago a Profesores</option>
+                            <option value="egreso-otros">Otros Egresos</option>
+                        </optgroup>
+                        <optgroup label="⚙️ SISTEMA">
+                            <option value="ajuste-saldo">🔄 Ajuste / Saldo Inicial (Caja Real)</option>
+                        </optgroup>
                     </select>
 
                     <div id="fields-alumno" class="bg-indigo-50/50 p-4 rounded-2xl space-y-3 border border-indigo-100">
@@ -235,7 +250,6 @@
             const ui = document.getElementById('lista-transacciones');
             let ingT = 0, egrT = 0, ingP = 0, egrP = 0;
 
-            // Lógica de Ciclo 15 al 14
             const hoy = new Date();
             let iniCorte, finCorte;
 
@@ -253,35 +267,52 @@
 
             ui.innerHTML = transacciones.slice(0,25).map(t => {
                 const monto = Number(t.monto);
-                const esIng = t.categoria.includes('ingreso') || t.categoria === 'ajuste-saldo';
-                const esEgreso = t.categoria.includes('egreso');
+                const esIng = t.categoria.startsWith('ingreso') || t.categoria === 'ajuste-saldo';
+                const esHistorico = t.categoria === 'ingreso-historico';
                 
-                // Normalizar fecha
+                // Mapeo de nombres de categoría para mostrar en la lista
+                const nombresCat = {
+                    'ingreso-clase': 'PAGO CLASE',
+                    'ingreso-taller': 'TALLER',
+                    'ingreso-material': 'MATERIAL',
+                    'ingreso-consulta': 'CONSULTA',
+                    'ingreso-renta-local': 'RENTA CONSULTORIO',
+                    'ingreso-otro': 'OTRO INGRESO',
+                    'ingreso-historico': 'CARGA HISTÓRICA',
+                    'egreso-renta': 'GASTO: RENTA',
+                    'egreso-luz': 'GASTO: LUZ',
+                    'egreso-internet': 'GASTO: INTERNET',
+                    'egreso-profesores': 'PAGO PROFESOR',
+                    'egreso-otros': 'OTROS GASTOS',
+                    'ajuste-saldo': 'AJUSTE DE CAJA'
+                };
+
                 const fechaT = new Date(t.fechaPago + "T12:00:00");
 
-                if (t.categoria === 'ajuste-saldo') {
-                    ingT += monto; // El ajuste cuenta como base positiva
-                } else {
-                    if (esIng) ingT += monto; else egrT += monto;
-                }
+                if (!esHistorico) {
+                    if (t.categoria === 'ajuste-saldo') {
+                        ingT += monto; 
+                    } else {
+                        if (esIng) ingT += monto; else egrT += monto;
+                    }
 
-                // Verificar periodo de renta
-                if (fechaT >= iniCorte && fechaT <= finCorte) {
-                    if (t.categoria === 'ajuste-saldo') ingP += monto;
-                    else if (esIng) ingP += monto; else egrP += monto;
+                    if (fechaT >= iniCorte && fechaT <= finCorte) {
+                        if (t.categoria === 'ajuste-saldo') ingP += monto;
+                        else if (esIng) ingP += monto; else egrP += monto;
+                    }
                 }
 
                 return `
-                    <div class="bg-white p-3 rounded-xl border border-slate-100 flex justify-between items-center group">
+                    <div class="bg-white p-3 rounded-xl border border-slate-100 flex justify-between items-center group ${esHistorico ? 'opacity-60' : ''}">
                         <div class="flex items-center gap-3">
-                            <div class="w-1.5 h-1.5 rounded-full ${t.categoria === 'ajuste-saldo' ? 'bg-indigo-400' : (esIng ? 'bg-emerald-400' : 'bg-rose-400')}"></div>
+                            <div class="w-1.5 h-1.5 rounded-full ${esHistorico ? 'bg-slate-400' : (t.categoria === 'ajuste-saldo' ? 'bg-indigo-400' : (esIng ? 'bg-emerald-400' : 'bg-rose-400'))}"></div>
                             <div>
-                                <p class="text-[9px] font-black uppercase">${t.categoria === 'ajuste-saldo' ? '🔄 AJUSTE DE CAJA' : (t.alumno || t.descripcion || 'Sin nombre')}</p>
-                                <p class="text-[7px] font-bold text-slate-400">${t.fechaPago} ${t.descripcion ? '• ' + t.descripcion : ''}</p>
+                                <p class="text-[9px] font-black uppercase text-indigo-950">${nombresCat[t.categoria] || 'MOVIMIENTO'}</p>
+                                <p class="text-[8px] font-bold text-slate-500 uppercase">${t.alumno || t.descripcion || 'Sin detalle'}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <p class="font-black text-xs ${t.categoria === 'ajuste-saldo' ? 'text-indigo-600' : (esIng ? 'text-emerald-500' : 'text-rose-500')}">${esIng ? '+' : '-'}$${monto}</p>
+                            <p class="font-black text-xs ${esHistorico ? 'text-slate-400' : (t.categoria === 'ajuste-saldo' ? 'text-indigo-600' : (esIng ? 'text-emerald-500' : 'text-rose-500'))}">${esIng ? '+' : '-'}$${monto}</p>
                             <button onclick="borrarMovimiento('${t.id}')" class="text-rose-300 hover:text-rose-600 font-bold px-2">&times;</button>
                         </div>
                     </div>
@@ -420,7 +451,8 @@
         window.abrirHistorial = (nombre) => {
             const alu = alumnos.find(a => a.nombre === nombre);
             const cur = cursos.find(c => c.nombre === alu.curso);
-            const pagos = transacciones.filter(t => t.alumno === nombre && t.categoria === 'ingreso-clase');
+            // Ahora incluimos tanto pagos de clase como cargas históricas en el modal del alumno
+            const pagos = transacciones.filter(t => t.alumno === nombre && (t.categoria === 'ingreso-clase' || t.categoria === 'ingreso-historico'));
             
             document.getElementById('modal-nombre').innerText = nombre;
             document.getElementById('modal-curp').innerText = alu.curp || 'Sin CURP';
@@ -476,7 +508,9 @@
 
         window.toggleFields = () => {
             const cat = document.getElementById('categoria').value;
-            document.getElementById('fields-alumno').classList.toggle('hidden', cat !== 'ingreso-clase');
+            // Los campos de alumno solo se muestran para Pagos de Clase y Carga Histórica
+            const requiereAlumno = (cat === 'ingreso-clase' || cat === 'ingreso-historico');
+            document.getElementById('fields-alumno').classList.toggle('hidden', !requiereAlumno);
         };
 
         window.exportarExcel = () => {
