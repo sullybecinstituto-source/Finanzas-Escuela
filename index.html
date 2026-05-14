@@ -41,18 +41,17 @@
     </div>
 
     <div class="max-w-4xl mx-auto px-4 pt-6 pb-24">
-        <!-- Dashboard de Saldos -->
         <div class="premium-card p-6 rounded-[2.5rem] text-white mb-6 shadow-2xl relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest text-center">Saldo Total en Caja</p>
-                <h2 id="total-balance" class="text-5xl font-black mt-2 text-center tracking-tight">$0</h2>
+            <div class="relative z-10 text-center">
+                <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest">Saldo Total Combinado</p>
+                <h2 id="total-balance" class="text-5xl font-black mt-2 tracking-tight">$0</h2>
                 
                 <div class="grid grid-cols-2 gap-4 mt-8">
-                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                        <p class="text-[9px] font-bold uppercase opacity-60 mb-1">🏦 Banco / Transferencia</p>
+                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
+                        <p class="text-[9px] font-bold uppercase opacity-60 mb-1">🏦 Banco / Transf.</p>
                         <p id="total-banco" class="text-lg font-black">$0</p>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
                         <p class="text-[9px] font-bold uppercase opacity-60 mb-1">💵 Efectivo Físico</p>
                         <p id="total-efectivo" class="text-lg font-black">$0</p>
                     </div>
@@ -60,15 +59,14 @@
             </div>
         </div>
 
-        <!-- Corte de Renta (Día 15) -->
+        <!-- Corte de Renta -->
         <div class="bg-white border border-slate-200 rounded-3xl p-5 mb-8 shadow-sm">
             <div class="flex justify-between items-end mb-4">
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase">Ciclo de Renta (Día 15)</p>
-                    <p id="renta-periodo" class="text-xs font-bold text-indigo-600 mt-1">Cargando periodo...</p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase">Acumulado Renta (Día 15)</p>
+                    <p id="renta-periodo" class="text-[9px] font-bold text-indigo-600 mt-1 uppercase">Cargando...</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[9px] font-black text-slate-400 uppercase">Acumulado Mes</p>
                     <p id="renta-acumulado" class="text-xl font-black text-slate-900">$0</p>
                 </div>
             </div>
@@ -77,6 +75,7 @@
             </div>
         </div>
 
+        <!-- Navegación -->
         <nav class="flex mb-8 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 sticky top-[72px] z-30">
             <button onclick="switchTab('finanzas')" id="btn-finanzas" class="flex-1 py-3 text-[10px] font-black uppercase tab-active">Cobros</button>
             <button onclick="switchTab('gestion')" id="btn-gestion" class="flex-1 py-3 text-[10px] font-black uppercase text-slate-400">Alumnos</button>
@@ -89,8 +88,8 @@
                 <form id="finance-form" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Tipo de Movimiento</label>
-                            <select id="categoria" onchange="toggleFields()" class="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 font-bold text-sm text-indigo-950 focus:border-indigo-200 focus:bg-white outline-none transition-all">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Categoría de Movimiento</label>
+                            <select id="categoria" onchange="toggleFields()" class="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 font-bold text-sm text-indigo-950 focus:border-indigo-200 outline-none">
                                 <optgroup label="INGRESOS">
                                     <option value="ingreso-clase">Pago de Clase (Alumno)</option>
                                     <option value="ingreso-taller">Ingreso por Taller</option>
@@ -109,8 +108,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Método</label>
-                            <select id="metodo" class="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 font-bold text-sm text-indigo-950 focus:border-indigo-200 focus:bg-white outline-none transition-all">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Método de Pago</label>
+                            <select id="metodo" class="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 font-bold text-sm text-indigo-950 focus:border-indigo-200 outline-none">
                                 <option value="efectivo">💵 Efectivo</option>
                                 <option value="transferencia">🏦 Transferencia / Banco</option>
                             </select>
@@ -126,7 +125,7 @@
                         </div>
                         
                         <div class="flex items-center justify-between bg-white/60 p-3 rounded-2xl border border-indigo-100">
-                            <span class="text-[10px] font-black text-indigo-900 uppercase">¿Es Carga Histórica? (No afecta caja)</span>
+                            <span class="text-[10px] font-black text-indigo-900 uppercase">¿Carga Histórica? (No afecta caja)</span>
                             <label class="switch">
                                 <input type="checkbox" id="check-historico">
                                 <span class="slider"></span>
@@ -136,7 +135,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="text-[8px] font-bold text-indigo-300 uppercase ml-1 block">N° Sesión</label>
-                                <input type="number" id="num-sesion" placeholder="Sesión" class="w-full bg-white border-none rounded-xl p-3 text-xs font-bold shadow-sm">
+                                <input type="number" id="num-sesion" placeholder="1" class="w-full bg-white border-none rounded-xl p-3 text-xs font-bold shadow-sm">
                             </div>
                             <div>
                                 <label class="text-[8px] font-bold text-indigo-300 uppercase ml-1 block">Fecha de Clase</label>
@@ -148,10 +147,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Monto $</label>
-                            <input type="number" id="monto" placeholder="0.00" required class="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 font-black text-xl text-indigo-600 focus:border-indigo-200 focus:bg-white outline-none">
+                            <input type="number" id="monto" placeholder="0.00" required class="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 font-black text-xl text-indigo-600 outline-none">
                         </div>
                         <div>
-                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Fecha del Pago (Hoy)</label>
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-2 mb-1 block">Fecha de Pago (Hoy)</label>
                             <input type="date" id="fecha-pago-real" required class="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 font-bold text-sm outline-none">
                         </div>
                     </div>
@@ -162,18 +161,14 @@
                 </form>
             </div>
 
-            <!-- Lista de Movimientos -->
-            <div>
-                <h3 class="text-[10px] font-black text-slate-400 uppercase mb-4 ml-4 tracking-widest">Últimos movimientos</h3>
-                <div id="lista-transacciones" class="space-y-3"></div>
-            </div>
+            <div id="lista-transacciones" class="space-y-3"></div>
         </section>
 
         <!-- SECCIÓN: ALUMNOS -->
         <section id="sec-gestion" class="hidden space-y-6">
             <div class="bg-white border-2 border-indigo-50 rounded-[2.5rem] p-6 shadow-sm">
                 <form id="alumno-form" class="space-y-3">
-                    <input type="text" id="nombre-alumno" placeholder="Nombre completo del alumno" required class="w-full bg-slate-50 rounded-2xl p-4 text-sm font-bold border-none outline-none focus:ring-2 focus:ring-indigo-100">
+                    <input type="text" id="nombre-alumno" placeholder="Nombre completo del alumno" required class="w-full bg-slate-50 rounded-2xl p-4 text-sm font-bold border-none outline-none">
                     <input type="text" id="curp-alumno" placeholder="CURP (18 dígitos)" maxlength="18" class="w-full bg-slate-50 rounded-2xl p-4 text-sm font-bold border-none outline-none uppercase">
                     <select id="select-curso-alumno" required class="w-full bg-slate-50 rounded-2xl p-4 text-sm font-bold border-none outline-none">
                         <option value="">Seleccionar Diplomado...</option>
@@ -238,15 +233,11 @@
                         <input type="file" class="hidden" onchange="importarExcel(event)">
                     </label>
                 </div>
-                <div class="pt-4 border-t border-slate-200 space-y-3">
-                    <button onclick="solicitarLimpieza('transacciones', 'MOVIMIENTOS')" class="w-full bg-rose-50 text-rose-400 py-3 rounded-xl font-black text-[9px] uppercase">Borrar Historial de Pagos</button>
-                    <button onclick="solicitarLimpieza('global', 'SISTEMA COMPLETO')" class="w-full bg-rose-600 text-white py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-rose-100">🔥 Borrar TODO el sistema</button>
-                </div>
             </div>
         </section>
     </div>
 
-    <!-- MODAL: HISTORIAL ALUMNO -->
+    <!-- MODAL HISTORIAL -->
     <div id="modal-historial" class="fixed inset-0 bg-black/60 z-[100] hidden flex flex-col">
         <div class="flex-1 flex flex-col max-w-2xl mx-auto w-full bg-white mt-12 rounded-t-[3rem] shadow-2xl overflow-hidden">
             <div class="p-8 bg-indigo-950 text-white flex justify-between items-start">
@@ -276,19 +267,6 @@
         </div>
     </div>
 
-    <!-- CONFIRMACIÓN -->
-    <div id="custom-confirm" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-8 shadow-2xl text-center">
-            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">⚠️</div>
-            <h3 class="text-xl font-black text-slate-900 mb-2 uppercase">¿Estás seguro?</h3>
-            <p id="confirm-text" class="text-slate-500 text-sm mb-6 leading-relaxed"></p>
-            <div class="flex flex-col gap-2">
-                <button id="confirm-yes" class="w-full bg-rose-600 text-white py-4 rounded-2xl font-black uppercase text-xs">Sí, borrar definitivamente</button>
-                <button onclick="cerrarConfirmacion()" class="w-full bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase text-xs">No, cancelar</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, getDocs, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -307,9 +285,7 @@
         
         let transacciones = [], alumnos = [], cursos = [];
         let festivosTemporales = [];
-        let pendienteLimpieza = null;
 
-        // --- NAVEGACIÓN ---
         window.switchTab = (t) => {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`sec-${t}`).classList.remove('hidden');
@@ -320,7 +296,6 @@
             document.getElementById(`btn-${t}`).classList.add('tab-active', 'text-slate-900');
         };
 
-        // --- ESCUCHADORES FIREBASE ---
         onSnapshot(query(collection(db, "transacciones"), orderBy("timestamp", "desc")), (s) => { 
             transacciones = s.docs.map(d => ({id:d.id, ...d.data()})); 
             renderFinanzas(); 
@@ -338,282 +313,193 @@
             actualizarSelectCursos();
         });
 
-        // --- LOGICA DE FINANZAS ---
         function renderFinanzas() {
             const ui = document.getElementById('lista-transacciones');
-            let balance = 0, ingEfectivo = 0, ingBanco = 0, egEfectivo = 0, egBanco = 0;
-            let acumuladoRenta = 0;
-
+            let ingEfe = 0, ingBan = 0, egEfe = 0, egBan = 0, acumRenta = 0;
             const hoy = new Date();
-            const diaHoy = hoy.getDate();
-            const mesActual = hoy.getMonth();
-            const anioActual = hoy.getFullYear();
+            const inicioCiclo = hoy.getDate() < 15 ? new Date(hoy.getFullYear(), hoy.getMonth() - 1, 15) : new Date(hoy.getFullYear(), hoy.getMonth(), 15);
+            const finCiclo = new Date(inicioCiclo.getFullYear(), inicioCiclo.getMonth() + 1, 14);
 
-            let inicioCiclo, finCiclo;
-            if (diaHoy < 15) {
-                inicioCiclo = new Date(anioActual, mesActual - 1, 15);
-                finCiclo = new Date(anioActual, mesActual, 14);
-            } else {
-                inicioCiclo = new Date(anioActual, mesActual, 15);
-                finCiclo = new Date(anioActual, mesActual + 1, 14);
-            }
+            document.getElementById('renta-periodo').innerText = `Ciclo: ${inicioCiclo.toLocaleDateString()} - ${finCiclo.toLocaleDateString()}`;
 
-            document.getElementById('renta-periodo').innerText = `${inicioCiclo.toLocaleDateString('es-MX')} al ${finCiclo.toLocaleDateString('es-MX')}`;
-            
-            const diasTotales = (finCiclo - inicioCiclo) / (1000*60*60*24);
-            const diasPasados = (hoy - inicioCiclo) / (1000*60*60*24);
-            document.getElementById('renta-progreso').style.width = `${Math.min(100, (diasPasados / diasTotales) * 100)}%`;
+            ui.innerHTML = transacciones.slice(0, 20).map(t => {
+                const esIng = t.categoria.startsWith('ingreso');
+                const esHis = t.categoria === 'ingreso-historico';
+                const m = Number(t.monto);
+                const fp = new Date(t.fechaPago + "T00:00:00");
 
-            ui.innerHTML = transacciones.slice(0, 15).map(t => {
-                const esIngreso = t.categoria.startsWith('ingreso');
-                const esHistorico = t.categoria === 'ingreso-historico';
-                const monto = Number(t.monto);
-                const fechaP = new Date(t.fechaPago + "T00:00:00");
-
-                if (!esHistorico) {
-                    if (esIngreso) {
-                        t.metodo === 'efectivo' ? ingEfectivo += monto : ingBanco += monto;
-                        if (fechaP >= inicioCiclo && fechaP <= finCiclo) acumuladoRenta += monto;
+                if (!esHis) {
+                    if (esIng) {
+                        t.metodo === 'efectivo' ? ingEfe += m : ingBan += m;
+                        if (fp >= inicioCiclo && fp <= finCiclo) acumRenta += m;
                     } else {
-                        t.metodo === 'efectivo' ? egEfectivo += monto : egBanco += monto;
-                        if (fechaP >= inicioCiclo && fechaP <= finCiclo) acumuladoRenta -= monto;
+                        t.metodo === 'efectivo' ? egEfe += m : egBan += m;
+                        if (fp >= inicioCiclo && fp <= finCiclo) acumRenta -= m;
                     }
                 }
 
                 return `
-                    <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm ${esHistorico ? 'opacity-40' : ''}">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center ${esHis ? 'opacity-40' : ''}">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] ${esIngreso ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
-                                ${esIngreso ? '↓' : '↑'}
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] ${esIng ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
+                                ${esIng ? '↓' : '↑'}
                             </div>
                             <div>
-                                <p class="text-[10px] font-black uppercase text-indigo-950 leading-none">${t.categoria.replace('ingreso-', '').replace('egreso-', '').toUpperCase()}</p>
-                                <p class="text-[8px] font-bold text-slate-400 mt-1 uppercase">${t.alumno ? t.alumno + ' | ' : ''}${t.fechaPago}</p>
+                                <p class="text-[9px] font-black uppercase text-indigo-950">${t.categoria.split('-')[1].toUpperCase()}</p>
+                                <p class="text-[7px] font-bold text-slate-400 uppercase">${t.alumno || 'General'} | ${t.fechaPago}</p>
                             </div>
                         </div>
-                        <div class="text-right flex items-center gap-4">
-                            <div>
-                                <p class="text-sm font-black ${esIngreso ? 'text-emerald-500' : 'text-rose-500'}">${esIngreso ? '+' : '-'}$${monto}</p>
-                                <p class="text-[7px] font-bold text-slate-300 uppercase">${t.metodo}</p>
-                            </div>
-                            <button onclick="borrarTransaccion('${t.id}')" class="text-slate-200 hover:text-rose-400 transition-colors">✕</button>
+                        <div class="text-right">
+                            <p class="text-sm font-black ${esIng ? 'text-emerald-500' : 'text-rose-500'}">${esIng ? '+' : '-'}$${m.toLocaleString()}</p>
+                            <button onclick="borrarT('${t.id}')" class="text-[8px] font-bold text-slate-300 uppercase">Eliminar</button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            const totalEfectivo = ingEfectivo - egEfectivo;
-            const totalBanco = ingBanco - egBanco;
-            document.getElementById('total-efectivo').innerText = `$${totalEfectivo.toLocaleString()}`;
-            document.getElementById('total-banco').innerText = `$${totalBanco.toLocaleString()}`;
-            document.getElementById('total-balance').innerText = `$${(totalEfectivo + totalBanco).toLocaleString()}`;
-            document.getElementById('renta-acumulado').innerText = `$${acumuladoRenta.toLocaleString()}`;
+            document.getElementById('total-efectivo').innerText = `$${(ingEfe - egEfe).toLocaleString()}`;
+            document.getElementById('total-banco').innerText = `$${(ingBan - egBan).toLocaleString()}`;
+            document.getElementById('total-balance').innerText = `$${(ingEfe + ingBan - egEfe - egBan).toLocaleString()}`;
+            document.getElementById('renta-acumulado').innerText = `$${acumRenta.toLocaleString()}`;
+            
+            const pct = Math.min(100, ((hoy - inicioCiclo) / (finCiclo - inicioCiclo)) * 100);
+            document.getElementById('renta-progreso').style.width = pct + "%";
         }
 
-        // --- GESTIÓN DE ALUMNOS ---
         function renderAlumnos() {
             document.getElementById('ui-alumnos').innerHTML = alumnos.map(a => `
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm clickable-card cursor-pointer" onclick="abrirHistorial('${a.id}')">
                     <div>
                         <p class="font-black text-sm uppercase text-indigo-900">${a.nombre}</p>
-                        <p class="text-[8px] font-bold text-emerald-500 uppercase mt-0.5">${a.curso}</p>
-                        <p class="text-[8px] font-bold text-slate-300 mt-1 tracking-widest">${a.curp || 'SIN CURP'}</p>
+                        <p class="text-[8px] font-bold text-emerald-500 uppercase">${a.curso}</p>
                     </div>
-                    <button onclick="event.stopPropagation(); borrarAlumno('${a.id}')" class="text-rose-200 hover:text-rose-500">✕</button>
+                    <button onclick="event.stopPropagation(); borrarA('${a.id}')" class="text-rose-200">✕</button>
                 </div>
             `).join('');
         }
 
-        window.abrirHistorial = (idAlumno) => {
-            const alu = alumnos.find(a => a.id === idAlumno);
-            if (!alu) return;
+        window.abrirHistorial = (id) => {
+            const alu = alumnos.find(x => x.id === id);
+            const cur = cursos.find(x => x.nombre === alu.curso);
+            const pagos = transacciones.filter(t => t.alumno === alu.nombre && t.curso === alu.curso && t.categoria.includes('ingreso'));
             
-            const cur = cursos.find(c => c.nombre === alu.curso);
-            const pagos = transacciones.filter(t => t.alumno === alu.nombre && t.curso === alu.curso && (t.categoria === 'ingreso-clase' || t.categoria === 'ingreso-historico'));
-
-            document.getElementById('modal-nombre').innerText = alu.nombre;
-            document.getElementById('modal-curp').innerText = `${alu.curso} | ${alu.curp || 'SIN CURP'}`;
-
-            let impartidas = 0;
+            let imp = 0;
             if (cur && cur.fechaInicio) {
-                const start = new Date(cur.fechaInicio + "T00:00:00");
-                const today = new Date();
-                let temp = new Date(start);
-                while (temp <= today) {
-                    const fStr = temp.toISOString().split('T')[0];
-                    if (!cur.festivos?.includes(fStr)) impartidas++;
-                    temp.setDate(temp.getDate() + 7);
+                let d = new Date(cur.fechaInicio + "T00:00:00");
+                const hoy = new Date();
+                while (d <= hoy) {
+                    if (!cur.festivos?.includes(d.toISOString().split('T')[0])) imp++;
+                    d.setDate(d.getDate() + 7);
                 }
             }
 
-            const pagadas = pagos.length;
-            const deuda = Math.max(0, impartidas - pagadas);
-
-            document.getElementById('calc-clases-total').innerText = impartidas;
-            document.getElementById('calc-clases-pagadas').innerText = pagadas;
-            document.getElementById('calc-clases-debe').innerText = deuda;
+            document.getElementById('modal-nombre').innerText = alu.nombre;
+            document.getElementById('modal-curp').innerText = alu.curp || 'SIN CURP';
+            document.getElementById('calc-clases-total').innerText = imp;
+            document.getElementById('calc-clases-pagadas').innerText = pagos.length;
+            document.getElementById('calc-clases-debe').innerText = Math.max(0, imp - pagos.length);
 
             document.getElementById('modal-content').innerHTML = pagos.map(p => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex justify-between">
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-indigo-950">SESIÓN ${p.numSesion}</p>
-                        <p class="text-[8px] font-bold text-slate-400 uppercase">${p.fechaClase} (Pagado: ${p.fechaPago})</p>
-                    </div>
-                    <p class="text-sm font-black text-emerald-600">$${p.monto}</p>
+                <div class="bg-white p-4 rounded-xl border border-slate-100 flex justify-between">
+                    <div><p class="text-[10px] font-black uppercase">Sesión ${p.numSesion}</p><p class="text-[8px] text-slate-400">${p.fechaClase}</p></div>
+                    <p class="font-black text-emerald-500">$${p.monto}</p>
                 </div>
-            `).join('') || '<p class="text-center text-[10px] font-bold text-slate-300 py-10 uppercase tracking-widest">Sin pagos registrados</p>';
-
+            `).join('');
             document.getElementById('modal-historial').classList.remove('hidden');
         };
 
         window.cerrarModal = () => document.getElementById('modal-historial').classList.add('hidden');
 
-        // --- GESTIÓN DE DIPLOMADOS ---
         function renderCursos() {
             document.getElementById('ui-cursos').innerHTML = cursos.map(c => `
                 <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm flex justify-between items-center clickable-card cursor-pointer" onclick="editarCurso('${c.id}')">
-                    <div>
-                        <p class="font-black text-sm uppercase text-slate-900">${c.nombre}</p>
-                        <div class="flex gap-4 mt-1">
-                            <p class="text-[9px] font-bold text-indigo-500 uppercase">Sesión: $${c.costo}</p>
-                            <p class="text-[9px] font-bold text-slate-400 uppercase">Inicio: ${c.fechaInicio || 'Pendiente'}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                         <p class="text-[8px] font-black text-slate-300 uppercase mb-1">Días Libres: ${c.festivos?.length || 0}</p>
-                         <button onclick="event.stopPropagation(); borrarCurso('${c.id}')" class="text-rose-100 hover:text-rose-500">✕</button>
-                    </div>
+                    <div><p class="font-black text-sm uppercase">${c.nombre}</p><p class="text-[8px] font-bold text-indigo-500 uppercase">$${c.costo} / sesión</p></div>
+                    <button onclick="event.stopPropagation(); borrarC('${c.id}')" class="text-rose-200">✕</button>
                 </div>
             `).join('');
         }
 
         window.agregarFestivo = () => {
-            const fecha = document.getElementById('input-festivo').value;
-            if (!fecha || festivosTemporales.includes(fecha)) return;
-            festivosTemporales.push(fecha);
-            renderFestivos();
-            calcularFechaTermino();
-        };
-
-        window.quitarFestivo = (f) => {
-            festivosTemporales = festivosTemporales.filter(x => x !== f);
-            renderFestivos();
-            calcularFechaTermino();
+            const f = document.getElementById('input-festivo').value;
+            if (f && !festivosTemporales.includes(f)) {
+                festivosTemporales.push(f);
+                renderFestivos();
+                calcularTermino();
+            }
         };
 
         function renderFestivos() {
             document.getElementById('lista-festivos').innerHTML = festivosTemporales.map(f => `
-                <span class="bg-rose-50 text-rose-600 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-2 border border-rose-100">
+                <span class="bg-rose-50 text-rose-600 px-3 py-1 rounded-lg text-[9px] font-black flex items-center gap-1">
                     ${f} <button type="button" onclick="quitarFestivo('${f}')">✕</button>
                 </span>
             `).join('');
         }
 
-        function calcularFechaTermino() {
-            const inicio = document.getElementById('fecha-inicio-curso').value;
-            const sesiones = Number(document.getElementById('duracion-curso').value);
-            if (!inicio || !sesiones) return;
+        window.quitarFestivo = (f) => {
+            festivosTemporales = festivosTemporales.filter(x => x !== f);
+            renderFestivos();
+            calcularTermino();
+        };
 
-            let fecha = new Date(inicio + "T00:00:00");
-            let cont = 0;
-            while (cont < sesiones) {
-                const fStr = fecha.toISOString().split('T')[0];
-                if (!festivosTemporales.includes(fStr)) cont++;
-                if (cont < sesiones) fecha.setDate(fecha.getDate() + 7);
+        function calcularTermino() {
+            const start = document.getElementById('fecha-inicio-curso').value;
+            const sessions = Number(document.getElementById('duracion-curso').value);
+            if (!start || !sessions) return;
+            let d = new Date(start + "T00:00:00");
+            let c = 0;
+            while (c < sessions) {
+                if (!festivosTemporales.includes(d.toISOString().split('T')[0])) c++;
+                if (c < sessions) d.setDate(d.getDate() + 7);
             }
             document.getElementById('info-termino').classList.remove('hidden');
-            document.getElementById('calc-termino').innerText = fecha.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('calc-termino').innerText = d.toLocaleDateString('es-MX', { dateStyle: 'long' });
         }
 
-        window.editarCurso = (id) => {
-            const c = cursos.find(x => x.id === id);
-            document.getElementById('edit-curso-id').value = c.id;
-            document.getElementById('nombre-curso').value = c.nombre;
-            document.getElementById('duracion-curso').value = c.duracion;
-            document.getElementById('costo-clase').value = c.costo;
-            document.getElementById('fecha-inicio-curso').value = c.fechaInicio || '';
-            festivosTemporales = [...(c.festivos || [])];
-            renderFestivos();
-            calcularFechaTermino();
-            document.getElementById('btn-save-curso').innerText = "Actualizar Diplomado";
-            document.getElementById('btn-cancel-curso').classList.remove('hidden');
+        window.toggleFields = () => {
+            const isAlu = document.getElementById('categoria').value.includes('clase');
+            document.getElementById('fields-alumno').classList.toggle('hidden', !isAlu);
+            if (isAlu) sugerirSiguienteSesion();
         };
 
-        window.cancelarEdicionCurso = () => {
-            document.getElementById('curso-form').reset();
-            document.getElementById('edit-curso-id').value = "";
-            festivosTemporales = [];
-            renderFestivos();
-            document.getElementById('info-termino').classList.add('hidden');
-            document.getElementById('btn-save-curso').innerText = "Guardar Curso";
-            document.getElementById('btn-cancel-curso').classList.add('hidden');
-        };
-
-        // --- AUTOMATIZACIÓN DE COBROS ---
         window.sugerirSiguienteSesion = () => {
             const aluId = document.getElementById('select-alumno').value;
             if (!aluId) return;
-            const aluData = alumnos.find(a => a.id === aluId);
-            const cursoData = cursos.find(c => c.nombre === aluData.curso);
-            
-            if (cursoData) document.getElementById('monto').value = cursoData.costo;
+            const alu = alumnos.find(x => x.id === aluId);
+            const cur = cursos.find(x => x.nombre === alu.curso);
+            if (cur) document.getElementById('monto').value = cur.costo;
 
-            const ultimoPago = transacciones
-                .filter(t => t.alumno === aluData.nombre && t.curso === aluData.curso && (t.categoria.includes('ingreso-clase') || t.categoria === 'ingreso-historico'))
-                .sort((a, b) => new Date(b.fechaClase || b.fechaPago) - new Date(a.fechaClase || a.fechaPago))[0];
+            const ult = transacciones
+                .filter(t => t.alumno === alu.nombre && t.curso === alu.curso && t.categoria.includes('ingreso'))
+                .sort((a,b) => new Date(b.fechaClase) - new Date(a.fechaClase))[0];
 
-            if (ultimoPago) {
-                document.getElementById('num-sesion').value = Number(ultimoPago.numSesion) + 1;
-                let sigFecha = new Date(ultimoPago.fechaClase + "T00:00:00");
-                sigFecha.setDate(sigFecha.getDate() + 7);
-                
-                if (cursoData && cursoData.festivos) {
-                    while (cursoData.festivos.includes(sigFecha.toISOString().split('T')[0])) {
-                        sigFecha.setDate(sigFecha.getDate() + 7);
-                    }
-                }
-                document.getElementById('fecha-clase').value = sigFecha.toISOString().split('T')[0];
-            } else if (cursoData) {
+            if (ult) {
+                document.getElementById('num-sesion').value = Number(ult.numSesion) + 1;
+                let next = new Date(ult.fechaClase + "T00:00:00");
+                next.setDate(next.getDate() + 7);
+                while(cur?.festivos?.includes(next.toISOString().split('T')[0])) next.setDate(next.getDate() + 7);
+                document.getElementById('fecha-clase').value = next.toISOString().split('T')[0];
+            } else if (cur) {
                 document.getElementById('num-sesion').value = 1;
-                document.getElementById('fecha-clase').value = cursoData.fechaInicio;
+                document.getElementById('fecha-clase').value = cur.fechaInicio;
             }
         };
 
-        function actualizarSelectAlumnos() {
-            const sel = document.getElementById('select-alumno');
-            const val = sel.value;
-            sel.innerHTML = '<option value="">Seleccionar Alumno...</option>' + 
-                alumnos.map(a => `<option value="${a.id}">${a.nombre} (${a.curso})</option>`).join('');
-            sel.value = val;
-        }
-
-        function actualizarSelectCursos() {
-            const sel = document.getElementById('select-curso-alumno');
-            sel.innerHTML = '<option value="">Seleccionar Diplomado...</option>' + 
-                cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
-        }
-
-        // --- FORMULARIOS ---
         document.getElementById('finance-form').onsubmit = async (e) => {
             e.preventDefault();
             const cat = document.getElementById('categoria').value;
-            const esHis = document.getElementById('check-historico').checked;
-            const aluId = document.getElementById('select-alumno').value;
-            const aluData = aluId ? alumnos.find(a => a.id === aluId) : null;
-
+            const alu = alumnos.find(x => x.id === document.getElementById('select-alumno').value);
             await addDoc(collection(db, "transacciones"), {
-                categoria: (cat === 'ingreso-clase' && esHis) ? 'ingreso-historico' : cat,
+                categoria: (cat === 'ingreso-clase' && document.getElementById('check-historico').checked) ? 'ingreso-historico' : cat,
                 metodo: document.getElementById('metodo').value,
-                alumno: aluData ? aluData.nombre : '',
-                curso: aluData ? aluData.curso : '',
                 monto: Number(document.getElementById('monto').value),
+                alumno: alu ? alu.nombre : '',
+                curso: alu ? alu.curso : '',
                 numSesion: document.getElementById('num-sesion').value || '',
                 fechaClase: document.getElementById('fecha-clase').value || '',
                 fechaPago: document.getElementById('fecha-pago-real').value,
-                descripcion: document.getElementById('descripcion').value,
                 timestamp: serverTimestamp()
             });
-
             if (cat === 'ingreso-clase') sugerirSiguienteSesion();
             else e.target.reset();
         };
@@ -631,26 +517,55 @@
         document.getElementById('curso-form').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-curso-id').value;
-            const data = {
+            const d = {
                 nombre: document.getElementById('nombre-curso').value,
                 duracion: document.getElementById('duracion-curso').value,
                 costo: document.getElementById('costo-clase').value,
                 fechaInicio: document.getElementById('fecha-inicio-curso').value,
                 festivos: festivosTemporales
             };
-
-            if (id) await updateDoc(doc(db, "cursos", id), data);
-            else await addDoc(collection(db, "cursos"), data);
-            
+            id ? await updateDoc(doc(db, "cursos", id), d) : await addDoc(collection(db, "cursos"), d);
             cancelarEdicionCurso();
         };
 
-        // --- BORRADOS ---
-        window.borrarTransaccion = async (id) => { if(confirm("¿Borrar este movimiento?")) await deleteDoc(doc(db, "transacciones", id)); };
-        window.borrarAlumno = async (id) => { if(confirm("¿Eliminar alumno?")) await deleteDoc(doc(db, "alumnos", id)); };
-        window.borrarCurso = async (id) => { if(confirm("¿Eliminar diplomado?")) await deleteDoc(doc(db, "cursos", id)); };
+        window.editarCurso = (id) => {
+            const c = cursos.find(x => x.id === id);
+            document.getElementById('edit-curso-id').value = c.id;
+            document.getElementById('nombre-curso').value = c.nombre;
+            document.getElementById('duracion-curso').value = c.duracion;
+            document.getElementById('costo-clase').value = c.costo;
+            document.getElementById('fecha-inicio-curso').value = c.fechaInicio;
+            festivosTemporales = [...(c.festivos || [])];
+            renderFestivos();
+            calcularTermino();
+            document.getElementById('btn-save-curso').innerText = "Actualizar";
+            document.getElementById('btn-cancel-curso').classList.remove('hidden');
+        };
 
-        // --- EXPORTAR / IMPORTAR ---
+        window.cancelarEdicionCurso = () => {
+            document.getElementById('curso-form').reset();
+            document.getElementById('edit-curso-id').value = "";
+            festivosTemporales = [];
+            renderFestivos();
+            document.getElementById('btn-save-curso').innerText = "Guardar Curso";
+            document.getElementById('btn-cancel-curso').classList.add('hidden');
+        };
+
+        function actualizarSelectAlumnos() {
+            const s = document.getElementById('select-alumno');
+            const v = s.value;
+            s.innerHTML = '<option value="">Elegir alumno...</option>' + alumnos.map(a => `<option value="${a.id}">${a.nombre} (${a.curso})</option>`).join('');
+            s.value = v;
+        }
+
+        function actualizarSelectCursos() {
+            document.getElementById('select-curso-alumno').innerHTML = '<option value="">Seleccionar Diplomado...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+        }
+
+        window.borrarT = async (id) => { if(confirm("¿Borrar pago?")) await deleteDoc(doc(db, "transacciones", id)); };
+        window.borrarA = async (id) => { if(confirm("¿Eliminar alumno?")) await deleteDoc(doc(db, "alumnos", id)); };
+        window.borrarC = async (id) => { if(confirm("¿Eliminar diplomado?")) await deleteDoc(doc(db, "cursos", id)); };
+
         window.exportarExcel = () => {
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transacciones), "Pagos");
@@ -666,45 +581,20 @@
                 const p = XLSX.utils.sheet_to_json(wb.Sheets["Pagos"]);
                 const a = XLSX.utils.sheet_to_json(wb.Sheets["Alumnos"]);
                 const c = XLSX.utils.sheet_to_json(wb.Sheets["Cursos"]);
-                
-                if(confirm(`Se importarán ${p.length + a.length + c.length} registros. ¿Continuar?`)) {
-                    for(let x of p) await addDoc(collection(db, "transacciones"), { ...x, timestamp: serverTimestamp() });
+                if(confirm("Se importarán registros. ¿Continuar?")) {
+                    for(let x of p) await addDoc(collection(db, "transacciones"), {...x, timestamp: serverTimestamp()});
                     for(let x of a) await addDoc(collection(db, "alumnos"), x);
                     for(let x of c) await addDoc(collection(db, "cursos"), x);
-                    alert("Carga completada");
                 }
             };
             reader.readAsArrayBuffer(ev.target.files[0]);
         };
 
-        // --- LIMPIEZA GLOBAL ---
-        window.solicitarLimpieza = (tipo, desc) => {
-            pendienteLimpieza = tipo;
-            document.getElementById('confirm-text').innerText = `Estás a punto de borrar todos los ${desc}. Esta acción es irreversible.`;
-            document.getElementById('custom-confirm').classList.remove('hidden');
-        };
-
-        window.cerrarConfirmacion = () => document.getElementById('custom-confirm').classList.add('hidden');
-
-        document.getElementById('confirm-yes').onclick = async () => {
-            const colecciones = pendienteLimpieza === 'global' ? ["transacciones", "alumnos", "cursos"] : [pendienteLimpieza];
-            for (let col of colecciones) {
-                const snap = await getDocs(collection(db, col));
-                await Promise.all(snap.docs.map(d => deleteDoc(doc(db, col, d.id))));
-            }
-            cerrarConfirmacion();
-        };
-
-        // --- UI HELPERS ---
-        window.toggleFields = () => {
-            const isAlu = document.getElementById('categoria').value.includes('clase');
-            document.getElementById('fields-alumno').classList.toggle('hidden', !isAlu);
-        };
-
         document.getElementById('fecha-pago-real').valueAsDate = new Date();
-        document.getElementById('fecha-inicio-curso').onchange = calcularFechaTermino;
-        document.getElementById('duracion-curso').oninput = calcularFechaTermino;
-
+        document.getElementById('fecha-inicio-curso').onchange = calcularTermino;
+        document.getElementById('duracion-curso').oninput = calcularTermino;
+        
+        setTimeout(toggleFields, 1000);
     </script>
 </body>
 </html>
