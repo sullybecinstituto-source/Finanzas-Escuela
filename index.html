@@ -115,7 +115,7 @@
                         </div>
                     </div>
 
-                    <div id="fields-alumno" class="hidden bg-indigo-50/50 p-5 rounded-3xl space-y-4 border border-indigo-100">
+                    <div id="fields-alumno" class="bg-indigo-50/50 p-5 rounded-3xl space-y-4 border border-indigo-100">
                         <div>
                             <label class="text-[9px] font-black text-indigo-400 uppercase ml-1 mb-1 block">Seleccionar Alumno (Curso)</label>
                             <select id="select-alumno" onchange="sugerirSiguienteSesion()" class="w-full bg-white border-none rounded-xl p-3.5 text-sm font-bold shadow-sm text-indigo-900">
@@ -355,9 +355,6 @@
             }
         }
 
-        // Establecer fecha de hoy como predeterminada
-        document.getElementById('fecha-pago-real').value = new Date().toISOString().split('T')[0];
-
         function pedirConfirmacion(titulo, mensaje, accionProcesar) {
             const modal = document.getElementById('modal-confirm');
             document.getElementById('confirm-title').innerText = titulo;
@@ -381,7 +378,7 @@
             btnCancel.onclick = cerrar;
         }
 
-        window.switchTab = (t) => {
+        function switchTab(t) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`sec-${t}`).classList.remove('hidden');
             document.querySelectorAll('nav button').forEach(b => {
@@ -389,7 +386,8 @@
                 b.classList.add('text-slate-400');
             });
             document.getElementById(`btn-${t}`).classList.add('tab-active', 'text-slate-900');
-        };
+        }
+        window.switchTab = switchTab;
 
         onSnapshot(query(collection(db, "transacciones"), orderBy("timestamp", "desc")), (s) => { 
             transacciones = s.docs.map(d => ({id:d.id, ...d.data()})); 
@@ -549,36 +547,6 @@
             );
         };
 
-        window.borrarT = (id) => {
-            pedirConfirmacion(
-                '¿Eliminar Transacción?', 
-                '¿Deseas borrar este movimiento financiero?', 
-                async () => {
-                    try {
-                        await deleteDoc(doc(db, "transacciones", id));
-                    } catch (err) {
-                        console.error("Error al borrar transacción:", err);
-                    }
-                }
-            );
-        };
-
-        window.borrarC = (id) => {
-            const cur = cursos.find(x => x.id === id);
-            const nombre = cur ? cur.nombre : 'este diplomado';
-            pedirConfirmacion(
-                '¿Eliminar Diplomado?', 
-                `¿Deseas eliminar el diplomado "${nombre}"?`, 
-                async () => {
-                    try {
-                        await deleteDoc(doc(db, "cursos", id));
-                    } catch (err) {
-                        console.error("Error al borrar diplomado:", err);
-                    }
-                }
-            );
-        };
-
         window.abrirHistorial = (id) => {
             const alu = alumnos.find(x => x.id === id);
             if (!alu) return;
@@ -672,13 +640,7 @@
             document.getElementById('calc-termino').innerText = d.toLocaleDateString('es-MX', { dateStyle: 'long' });
         }
 
-        window.toggleFields = () => {
-            const isAlu = document.getElementById('categoria').value.includes('clase');
-            document.getElementById('fields-alumno').classList.toggle('hidden', !isAlu);
-            if (isAlu) sugerirSiguienteSesion();
-        };
-
-        window.sugerirSiguienteSesion = () => {
+        function sugerirSiguienteSesion() {
             const aluId = document.getElementById('select-alumno').value;
             if (!aluId) return;
             const alu = alumnos.find(x => x.id === aluId);
@@ -700,7 +662,19 @@
                 document.getElementById('num-sesion').value = 1;
                 document.getElementById('fecha-clase').value = cur.fechaInicio;
             }
-        };
+        }
+        window.sugerirSiguienteSesion = sugerirSiguienteSesion;
+
+        function toggleFields() {
+            const isAlu = document.getElementById('categoria').value.includes('clase');
+            document.getElementById('fields-alumno').classList.toggle('hidden', !isAlu);
+            if (isAlu) sugerirSiguienteSesion();
+        }
+        window.toggleFields = toggleFields;
+
+        // Inicializar fecha y visibilidad de campos de formulario tras definir funciones
+        document.getElementById('fecha-pago-real').value = new Date().toISOString().split('T')[0];
+        window.toggleFields();
 
         document.getElementById('finance-form').onsubmit = async (e) => {
             e.preventDefault();
