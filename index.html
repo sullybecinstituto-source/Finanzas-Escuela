@@ -75,7 +75,6 @@
             </div>
         </div>
 
-        <!-- Navegación -->
         <nav class="flex mb-8 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 sticky top-[72px] z-30">
             <button onclick="switchTab('finanzas')" id="btn-finanzas" class="flex-1 py-3 text-[10px] font-black uppercase tab-active">Cobros</button>
             <button onclick="switchTab('gestion')" id="btn-gestion" class="flex-1 py-3 text-[10px] font-black uppercase text-slate-400">Alumnos</button>
@@ -245,7 +244,7 @@
                     <h2 id="modal-nombre" class="text-2xl font-black uppercase leading-tight">Nombre Alumno</h2>
                     <p id="modal-curp" class="text-[10px] font-bold text-indigo-300 mt-1 uppercase tracking-widest"></p>
                 </div>
-                <button onclick="cerrarModal()" class="bg-white/10 p-3 rounded-2xl text-xs font-bold uppercase">Cerrar</button>
+                <button onclick="cerrarModal()" class="bg-white/10 p-3 rounded-2xl text-xs font-bold uppercase hover:bg-white/20">Cerrar</button>
             </div>
             
             <div id="deuda-summary" class="bg-indigo-50 p-6 grid grid-cols-3 gap-3 border-b border-indigo-100">
@@ -267,9 +266,28 @@
         </div>
     </div>
 
+    <!-- MODAL CONFIRMACIÓN (Remplazo seguro para borrar) -->
+    <div id="modal-confirm" class="fixed inset-0 bg-black/60 z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-sm w-full rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-black">
+                🗑️
+            </div>
+            <h3 id="confirm-title" class="text-lg font-black text-slate-900 leading-snug">¿Eliminar registro?</h3>
+            <p id="confirm-msg" class="text-xs text-slate-500 font-bold leading-relaxed"></p>
+            <div class="flex gap-3 pt-2">
+                <button id="btn-confirm-cancel" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 rounded-xl font-black text-xs uppercase text-slate-600 transition-colors">Cancelar</button>
+                <button id="btn-confirm-ok" class="flex-1 py-3.5 bg-rose-600 hover:bg-rose-700 rounded-xl font-black text-xs uppercase text-white shadow-lg shadow-rose-200 transition-colors">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor para Notificaciones Toast -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[200] flex flex-col gap-2 pointer-events-none max-w-xs w-full px-4"></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, getDocs, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCcAda5-ewiR78bfLyYrjEMhfdc0RFxd7s",
@@ -281,10 +299,87 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
         
+        // Autenticación segura previa
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (e) {
+            console.warn("Autenticación inicial:", e);
+        }
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'finanzas-escuela';
         let transacciones = [], alumnos = [], cursos = [];
         let festivosTemporales = [];
+
+        function showToast(mensaje, tipo = 'success') {
+            let container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const isSuccess = tipo === 'success';
+            toast.className = `p-4 rounded-2xl shadow-2xl text-white text-xs font-bold flex items-center justify-between transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-auto ${isSuccess ? 'bg-emerald-600' : 'bg-rose-600'}`;
+            toast.innerHTML = `<div class="flex items-center gap-2"><span>${isSuccess ? '✓' : '⚠️'}</span><span>${mensaje}</span></div>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        async function eliminarDoc(colName, id) {
+            let success = false;
+            try {
+                await deleteDoc(doc(db, colName, id));
+                success = true;
+            } catch (e1) {
+                console.warn("Intento de borrado 1:", e1);
+            }
+            try {
+                await deleteDoc(doc(db, "artifacts", appId, "public", "data", colName, id));
+                success = true;
+            } catch (e2) {
+                console.warn("Intento de borrado 2:", e2);
+            }
+            if (!success) {
+                throw new Error("No se pudo eliminar el documento de Firestore.");
+            }
+        }
+
+        // Establecer fecha de hoy como predeterminada
+        document.getElementById('fecha-pago-real').value = new Date().toISOString().split('T')[0];
+
+        function pedirConfirmacion(titulo, mensaje, accionProcesar) {
+            const modal = document.getElementById('modal-confirm');
+            document.getElementById('confirm-title').innerText = titulo;
+            document.getElementById('confirm-msg').innerText = mensaje;
+            
+            const btnOk = document.getElementById('btn-confirm-ok');
+            const btnCancel = document.getElementById('btn-confirm-cancel');
+            
+            modal.classList.remove('hidden');
+            
+            const cerrar = () => {
+                modal.classList.add('hidden');
+                btnOk.onclick = null;
+                btnCancel.onclick = null;
+            };
+            
+            btnOk.onclick = async () => {
+                cerrar();
+                await accionProcesar();
+            };
+            btnCancel.onclick = cerrar;
+        }
 
         window.switchTab = (t) => {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -351,7 +446,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-sm font-black ${esIng ? 'text-emerald-500' : 'text-rose-500'}">${esIng ? '+' : '-'}$${m.toLocaleString()}</p>
-                            <button onclick="borrarT('${t.id}')" class="text-[8px] font-bold text-slate-300 uppercase">Eliminar</button>
+                            <button onclick="borrarT('${t.id}')" class="text-[8px] font-bold text-slate-300 hover:text-rose-500 uppercase transition-colors">Eliminar</button>
                         </div>
                     </div>
                 `;
@@ -362,7 +457,7 @@
             document.getElementById('total-balance').innerText = `$${(ingEfe + ingBan - egEfe - egBan).toLocaleString()}`;
             document.getElementById('renta-acumulado').innerText = `$${acumRenta.toLocaleString()}`;
             
-            const pct = Math.min(100, ((hoy - inicioCiclo) / (finCiclo - inicioCiclo)) * 100);
+            const pct = Math.min(100, Math.max(0, ((hoy - inicioCiclo) / (finCiclo - inicioCiclo)) * 100));
             document.getElementById('renta-progreso').style.width = pct + "%";
         }
 
@@ -373,13 +468,120 @@
                         <p class="font-black text-sm uppercase text-indigo-900">${a.nombre}</p>
                         <p class="text-[8px] font-bold text-emerald-500 uppercase">${a.curso}</p>
                     </div>
-                    <button onclick="event.stopPropagation(); borrarA('${a.id}')" class="text-rose-200">✕</button>
+                    <button onclick="event.stopPropagation(); borrarA('${a.id}')" class="text-slate-300 hover:text-rose-600 p-2 text-sm font-bold transition-colors">✕</button>
                 </div>
             `).join('');
         }
 
+        window.borrarA = (id) => {
+            const alu = alumnos.find(x => x.id === id);
+            const nombre = alu ? alu.nombre : 'este alumno';
+            pedirConfirmacion(
+                '¿Eliminar Alumno?', 
+                `¿Deseas dar de baja a "${nombre}"? Esta acción no se puede deshacer.`, 
+                async () => {
+                    const backupAlumnos = [...alumnos];
+                    // Actualización optimista de la UI
+                    alumnos = alumnos.filter(x => x.id !== id);
+                    renderAlumnos();
+                    actualizarSelectAlumnos();
+
+                    try {
+                        await eliminarDoc("alumnos", id);
+                        showToast(`Alumno "${nombre}" eliminado correctamente`, "success");
+                    } catch (err) {
+                        console.error("Error al borrar alumno:", err);
+                        // Revertir si hay error
+                        alumnos = backupAlumnos;
+                        renderAlumnos();
+                        actualizarSelectAlumnos();
+                        showToast(`No se pudo eliminar a "${nombre}". Intenta de nuevo.`, "error");
+                    }
+                }
+            );
+        };
+
+        window.borrarT = (id) => {
+            pedirConfirmacion(
+                '¿Eliminar Transacción?', 
+                '¿Deseas borrar este movimiento financiero?', 
+                async () => {
+                    const backupTrans = [...transacciones];
+                    transacciones = transacciones.filter(t => t.id !== id);
+                    renderFinanzas();
+
+                    try {
+                        await eliminarDoc("transacciones", id);
+                        showToast("Transacción eliminada correctamente", "success");
+                    } catch (err) {
+                        console.error("Error al borrar transacción:", err);
+                        transacciones = backupTrans;
+                        renderFinanzas();
+                        showToast("No se pudo eliminar la transacción.", "error");
+                    }
+                }
+            );
+        };
+
+        window.borrarC = (id) => {
+            const cur = cursos.find(x => x.id === id);
+            const nombre = cur ? cur.nombre : 'este diplomado';
+            pedirConfirmacion(
+                '¿Eliminar Diplomado?', 
+                `¿Deseas eliminar el diplomado "${nombre}"?`, 
+                async () => {
+                    const backupCursos = [...cursos];
+                    cursos = cursos.filter(c => c.id !== id);
+                    renderCursos();
+                    actualizarSelectCursos();
+
+                    try {
+                        await eliminarDoc("cursos", id);
+                        showToast(`Diplomado "${nombre}" eliminado correctamente`, "success");
+                    } catch (err) {
+                        console.error("Error al borrar diplomado:", err);
+                        cursos = backupCursos;
+                        renderCursos();
+                        actualizarSelectCursos();
+                        showToast(`No se pudo eliminar "${nombre}".`, "error");
+                    }
+                }
+            );
+        };
+
+        window.borrarT = (id) => {
+            pedirConfirmacion(
+                '¿Eliminar Transacción?', 
+                '¿Deseas borrar este movimiento financiero?', 
+                async () => {
+                    try {
+                        await deleteDoc(doc(db, "transacciones", id));
+                    } catch (err) {
+                        console.error("Error al borrar transacción:", err);
+                    }
+                }
+            );
+        };
+
+        window.borrarC = (id) => {
+            const cur = cursos.find(x => x.id === id);
+            const nombre = cur ? cur.nombre : 'este diplomado';
+            pedirConfirmacion(
+                '¿Eliminar Diplomado?', 
+                `¿Deseas eliminar el diplomado "${nombre}"?`, 
+                async () => {
+                    try {
+                        await deleteDoc(doc(db, "cursos", id));
+                    } catch (err) {
+                        console.error("Error al borrar diplomado:", err);
+                    }
+                }
+            );
+        };
+
         window.abrirHistorial = (id) => {
             const alu = alumnos.find(x => x.id === id);
+            if (!alu) return;
             const cur = cursos.find(x => x.nombre === alu.curso);
             const pagos = transacciones.filter(t => t.alumno === alu.nombre && t.curso === alu.curso && t.categoria.includes('ingreso'));
             
@@ -401,7 +603,7 @@
 
             document.getElementById('modal-content').innerHTML = pagos.map(p => `
                 <div class="bg-white p-4 rounded-xl border border-slate-100 flex justify-between">
-                    <div><p class="text-[10px] font-black uppercase">Sesión ${p.numSesion}</p><p class="text-[8px] text-slate-400">${p.fechaClase}</p></div>
+                    <div><p class="text-[10px] font-black uppercase">Sesión ${p.numSesion || '-'}</p><p class="text-[8px] text-slate-400">${p.fechaClase || p.fechaPago}</p></div>
                     <p class="font-black text-emerald-500">$${p.monto}</p>
                 </div>
             `).join('');
@@ -414,9 +616,23 @@
             document.getElementById('ui-cursos').innerHTML = cursos.map(c => `
                 <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm flex justify-between items-center clickable-card cursor-pointer" onclick="editarCurso('${c.id}')">
                     <div><p class="font-black text-sm uppercase">${c.nombre}</p><p class="text-[8px] font-bold text-indigo-500 uppercase">$${c.costo} / sesión</p></div>
-                    <button onclick="event.stopPropagation(); borrarC('${c.id}')" class="text-rose-200">✕</button>
+                    <button onclick="event.stopPropagation(); borrarC('${c.id}')" class="text-slate-300 hover:text-rose-600 p-2 font-bold text-sm transition-colors">✕</button>
                 </div>
             `).join('');
+        }
+
+        function actualizarSelectAlumnos() {
+            const sel = document.getElementById('select-alumno');
+            const prev = sel.value;
+            sel.innerHTML = '<option value="">Elegir alumno...</option>' + alumnos.map(a => `<option value="${a.id}">${a.nombre} - ${a.curso}</option>`).join('');
+            sel.value = prev;
+        }
+
+        function actualizarSelectCursos() {
+            const sel = document.getElementById('select-curso-alumno');
+            const prev = sel.value;
+            sel.innerHTML = '<option value="">Seleccionar Diplomado...</option>' + cursos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+            sel.value = prev;
         }
 
         window.agregarFestivo = () => {
@@ -466,6 +682,7 @@
             const aluId = document.getElementById('select-alumno').value;
             if (!aluId) return;
             const alu = alumnos.find(x => x.id === aluId);
+            if (!alu) return;
             const cur = cursos.find(x => x.nombre === alu.curso);
             if (cur) document.getElementById('monto').value = cur.costo;
 
@@ -474,12 +691,12 @@
                 .sort((a,b) => new Date(b.fechaClase) - new Date(a.fechaClase))[0];
 
             if (ult) {
-                document.getElementById('num-sesion').value = Number(ult.numSesion) + 1;
+                document.getElementById('num-sesion').value = Number(ult.numSesion || 0) + 1;
                 let next = new Date(ult.fechaClase + "T00:00:00");
                 next.setDate(next.getDate() + 7);
                 while(cur?.festivos?.includes(next.toISOString().split('T')[0])) next.setDate(next.getDate() + 7);
                 document.getElementById('fecha-clase').value = next.toISOString().split('T')[0];
-            } else if (cur) {
+            } else if (cur && cur.fechaInicio) {
                 document.getElementById('num-sesion').value = 1;
                 document.getElementById('fecha-clase').value = cur.fechaInicio;
             }
@@ -498,6 +715,7 @@
                 numSesion: document.getElementById('num-sesion').value || '',
                 fechaClase: document.getElementById('fecha-clase').value || '',
                 fechaPago: document.getElementById('fecha-pago-real').value,
+                descripcion: document.getElementById('descripcion').value || '',
                 timestamp: serverTimestamp()
             });
             if (cat === 'ingreso-clase') sugerirSiguienteSesion();
@@ -506,95 +724,117 @@
 
         document.getElementById('alumno-form').onsubmit = async (e) => {
             e.preventDefault();
+            const nom = document.getElementById('nombre-alumno').value.trim();
+            const curp = document.getElementById('curp-alumno').value.trim().toUpperCase();
+            const cursoSelect = document.getElementById('select-curso-alumno');
+            const cursoObj = cursos.find(c => c.id === cursoSelect.value);
+
+            if (!nom || !cursoObj) return;
+
             await addDoc(collection(db, "alumnos"), {
-                nombre: document.getElementById('nombre-alumno').value,
-                curp: document.getElementById('curp-alumno').value.toUpperCase(),
-                curso: document.getElementById('select-curso-alumno').value
+                nombre: nom,
+                curp: curp,
+                curso: cursoObj.nombre,
+                cursoId: cursoObj.id,
+                timestamp: serverTimestamp()
             });
             e.target.reset();
         };
 
         document.getElementById('curso-form').onsubmit = async (e) => {
             e.preventDefault();
-            const id = document.getElementById('edit-curso-id').value;
-            const d = {
-                nombre: document.getElementById('nombre-curso').value,
-                duracion: document.getElementById('duracion-curso').value,
-                costo: document.getElementById('costo-clase').value,
+            const editId = document.getElementById('edit-curso-id').value;
+            const data = {
+                nombre: document.getElementById('nombre-curso').value.trim(),
+                duracion: Number(document.getElementById('duracion-curso').value),
+                costo: Number(document.getElementById('costo-clase').value),
                 fechaInicio: document.getElementById('fecha-inicio-curso').value,
-                festivos: festivosTemporales
+                festivos: [...festivosTemporales],
+                timestamp: serverTimestamp()
             };
-            id ? await updateDoc(doc(db, "cursos", id), d) : await addDoc(collection(db, "cursos"), d);
+
+            if (editId) {
+                await updateDoc(doc(db, "cursos", editId), data);
+            } else {
+                await addDoc(collection(db, "cursos"), data);
+            }
             cancelarEdicionCurso();
         };
 
         window.editarCurso = (id) => {
-            const c = cursos.find(x => x.id === id);
-            document.getElementById('edit-curso-id').value = c.id;
-            document.getElementById('nombre-curso').value = c.nombre;
-            document.getElementById('duracion-curso').value = c.duracion;
-            document.getElementById('costo-clase').value = c.costo;
-            document.getElementById('fecha-inicio-curso').value = c.fechaInicio;
-            festivosTemporales = [...(c.festivos || [])];
+            const cur = cursos.find(c => c.id === id);
+            if (!cur) return;
+            document.getElementById('edit-curso-id').value = cur.id;
+            document.getElementById('nombre-curso').value = cur.nombre;
+            document.getElementById('duracion-curso').value = cur.duracion;
+            document.getElementById('costo-clase').value = cur.costo;
+            document.getElementById('fecha-inicio-curso').value = cur.fechaInicio || '';
+            festivosTemporales = cur.festivos ? [...cur.festivos] : [];
             renderFestivos();
             calcularTermino();
-            document.getElementById('btn-save-curso').innerText = "Actualizar";
+            document.getElementById('btn-save-curso').innerText = 'Actualizar Curso';
             document.getElementById('btn-cancel-curso').classList.remove('hidden');
         };
 
         window.cancelarEdicionCurso = () => {
+            document.getElementById('edit-curso-id').value = '';
             document.getElementById('curso-form').reset();
-            document.getElementById('edit-curso-id').value = "";
             festivosTemporales = [];
             renderFestivos();
-            document.getElementById('btn-save-curso').innerText = "Guardar Curso";
+            document.getElementById('info-termino').classList.add('hidden');
+            document.getElementById('btn-save-curso').innerText = 'Guardar Curso';
             document.getElementById('btn-cancel-curso').classList.add('hidden');
         };
 
-        function actualizarSelectAlumnos() {
-            const s = document.getElementById('select-alumno');
-            const v = s.value;
-            s.innerHTML = '<option value="">Elegir alumno...</option>' + alumnos.map(a => `<option value="${a.id}">${a.nombre} (${a.curso})</option>`).join('');
-            s.value = v;
-        }
-
-        function actualizarSelectCursos() {
-            document.getElementById('select-curso-alumno').innerHTML = '<option value="">Seleccionar Diplomado...</option>' + cursos.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
-        }
-
-        window.borrarT = async (id) => { if(confirm("¿Borrar pago?")) await deleteDoc(doc(db, "transacciones", id)); };
-        window.borrarA = async (id) => { if(confirm("¿Eliminar alumno?")) await deleteDoc(doc(db, "alumnos", id)); };
-        window.borrarC = async (id) => { if(confirm("¿Eliminar diplomado?")) await deleteDoc(doc(db, "cursos", id)); };
-
         window.exportarExcel = () => {
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transacciones), "Pagos");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(alumnos), "Alumnos");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cursos), "Cursos");
-            XLSX.writeFile(wb, "Respaldo_SullyBec.xlsx");
+            const wsTrans = XLSX.utils.json_to_sheet(transacciones);
+            const wsAlu = XLSX.utils.json_to_sheet(alumnos);
+            const wsCur = XLSX.utils.json_to_sheet(cursos);
+
+            XLSX.utils.book_append_sheet(wb, wsTrans, "Transacciones");
+            XLSX.utils.book_append_sheet(wb, wsAlu, "Alumnos");
+            XLSX.utils.book_append_sheet(wb, wsCur, "Cursos");
+
+            XLSX.writeFile(wb, `SullyBec_Respaldo_${new Date().toISOString().split('T')[0]}.xlsx`);
         };
 
-        window.importarExcel = (ev) => {
+        window.importarExcel = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = async (e) => {
-                const wb = XLSX.read(e.target.result, {type: 'array'});
-                const p = XLSX.utils.sheet_to_json(wb.Sheets["Pagos"]);
-                const a = XLSX.utils.sheet_to_json(wb.Sheets["Alumnos"]);
-                const c = XLSX.utils.sheet_to_json(wb.Sheets["Cursos"]);
-                if(confirm("Se importarán registros. ¿Continuar?")) {
-                    for(let x of p) await addDoc(collection(db, "transacciones"), {...x, timestamp: serverTimestamp()});
-                    for(let x of a) await addDoc(collection(db, "alumnos"), x);
-                    for(let x of c) await addDoc(collection(db, "cursos"), x);
+            reader.onload = async (evt) => {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    if (workbook.SheetNames.includes("Transacciones")) {
+                        const json = XLSX.utils.sheet_to_json(workbook.Sheets["Transacciones"]);
+                        for (const row of json) {
+                            delete row.id;
+                            await addDoc(collection(db, "transacciones"), { ...row, timestamp: serverTimestamp() });
+                        }
+                    }
+                    if (workbook.SheetNames.includes("Alumnos")) {
+                        const json = XLSX.utils.sheet_to_json(workbook.Sheets["Alumnos"]);
+                        for (const row of json) {
+                            delete row.id;
+                            await addDoc(collection(db, "alumnos"), { ...row, timestamp: serverTimestamp() });
+                        }
+                    }
+                    if (workbook.SheetNames.includes("Cursos")) {
+                        const json = XLSX.utils.sheet_to_json(workbook.Sheets["Cursos"]);
+                        for (const row of json) {
+                            delete row.id;
+                            await addDoc(collection(db, "cursos"), { ...row, timestamp: serverTimestamp() });
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error al importar datos:", err);
                 }
             };
-            reader.readAsArrayBuffer(ev.target.files[0]);
+            reader.readAsArrayBuffer(file);
         };
-
-        document.getElementById('fecha-pago-real').valueAsDate = new Date();
-        document.getElementById('fecha-inicio-curso').onchange = calcularTermino;
-        document.getElementById('duracion-curso').oninput = calcularTermino;
-        
-        setTimeout(toggleFields, 1000);
     </script>
 </body>
 </html>
